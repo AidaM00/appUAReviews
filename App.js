@@ -5,6 +5,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text>UA Reviews!!</Text>
+      <Text>Prueba de conexión</Text>
       <StatusBar style="auto" />
     </View>
   );
