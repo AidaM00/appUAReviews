@@ -1,18 +1,36 @@
 import React from 'react';
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Home from '../components/Home';
 import Apartments from '../components/Apartments';
 import Statistics from '../components/Statistics';
 import Account from '../components/Account';
+import { View, Image, StyleSheet } from 'react-native';
 
 const Drawer = createDrawerNavigator();
+
+function CustomDrawerContent(props) {
+  return (
+    <DrawerContentScrollView {...props}>
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('../assets/images/logo.png')}  
+          style={styles.logo}
+        />
+      </View>
+      <DrawerItemList {...props} />
+    </DrawerContentScrollView>
+  );
+}
 
 export default function DrawerNavigation() {
   return (
     <NavigationContainer>
-      <Drawer.Navigator initialRouteName="Inicio">
+      <Drawer.Navigator
+        initialRouteName="Inicio"
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
+      >
         <Drawer.Screen
           name="Inicio"
           component={Home}
@@ -53,3 +71,16 @@ export default function DrawerNavigation() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  logoContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    borderRadius: 10,
+  },
+});

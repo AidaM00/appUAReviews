@@ -1,0 +1,1 @@
+export const GET_APARTMENTS = 'GET_APARTMENTS';
