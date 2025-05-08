@@ -7,6 +7,8 @@ import { useNavigation } from '@react-navigation/native';
 export default function ApartmentDetail({ route }) {
   const { id, name } = route.params;
   const description = useSelector(state => state.descripcion.descriptions[id]);
+  const features = description?.features || [];
+
   const apartmentImages = {
     1: require('../assets/images/apartments/1.png'),
     2: require('../assets/images/apartments/2.png'),
@@ -26,8 +28,8 @@ export default function ApartmentDetail({ route }) {
   };
 
   const imageSource = apartmentImages[id];
-
   const navigation = useNavigation();
+
   if (!description) {
     return (
       <ImageBackground
@@ -49,9 +51,9 @@ export default function ApartmentDetail({ route }) {
       resizeMode="cover"
     >
       <View style={styles.overlay}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => navigation.goBack()} 
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
         >
           <View style={styles.backButtonContainer}>
             <Icon name="arrow-left" size={20} color="#fff" />
@@ -63,6 +65,15 @@ export default function ApartmentDetail({ route }) {
           <Image source={imageSource} style={styles.apartmentImage} resizeMode="cover" />
           <Text style={styles.title}>{name}</Text>
           <Text style={styles.address}>{description.address}</Text>
+
+          <View style={styles.features}>
+            {features.map((item) => (
+              <View key={item.key} style={styles.featureRow}>
+                <Icon name={item.icon} size={24} color="#4a4a4a" style={styles.featureIcon} />
+                <Text style={styles.featureText}>{item.label}</Text>
+              </View>
+            ))}
+          </View>
         </View>
       </View>
     </ImageBackground>
@@ -70,9 +81,7 @@ export default function ApartmentDetail({ route }) {
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-  },
+  background: { flex: 1 },
   overlay: {
     flex: 1,
     padding: 20,
@@ -89,16 +98,16 @@ const styles = StyleSheet.create({
   backButtonContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#000', 
+    backgroundColor: '#000',
     paddingHorizontal: 15,
     paddingVertical: 10,
-    borderRadius: 30, 
+    borderRadius: 30,
     justifyContent: 'center',
   },
   backButtonText: {
     color: '#fff',
     fontSize: 14,
-    marginLeft: 10, 
+    marginLeft: 10,
   },
   card: {
     width: '100%',
@@ -110,7 +119,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
-    marginTop:-80,
+    marginTop: -80,
   },
   apartmentImage: {
     width: '100%',
@@ -130,5 +139,20 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#333',
     textAlign: 'center',
+  },
+  features: {
+    marginTop: 10,
+  },
+  featureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  featureIcon: {
+    marginRight: 12,
+  },
+  featureText: {
+    fontSize: 16,
+    color: '#333',
   },
 });
