@@ -5,38 +5,27 @@ import { getApartments } from '../redux/ActionCreators';
 import { Card, Title } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-export default function Apartments() {
+export default function Apartments({ navigation }) {
   const dispatch = useDispatch();
   const apartments = useSelector((state) => state.apartmentState.apartments);
-  const [expandedId, setExpandedId] = useState(null);
   const [cityFilter, setCityFilter] = useState('');
 
   useEffect(() => {
     dispatch(getApartments());
   }, []);
 
-  const toggleExpand = (id) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
-
-  const renderApartment = ({ item }) => {
-    return (
-      <TouchableOpacity onPress={() => toggleExpand(item.id)}>
-        <Card style={styles.card}>
-          <Card.Content>
-            <Title style={styles.cardTitle}>{item.name}</Title>
-          </Card.Content>
-        </Card>
-      </TouchableOpacity>
-    );
-  };
+  const renderApartment = ({ item }) => (
+    <TouchableOpacity onPress={() => navigation.navigate('ApartmentDetail', { id: item.id, name: item.name })}>
+      <Card style={styles.card}>
+        <Card.Content>
+          <Title style={styles.cardTitle}>{item.name}</Title>
+        </Card.Content>
+      </Card>
+    </TouchableOpacity>
+  );
 
   return (
-    <ImageBackground
-      source={require('../assets/images/fondo_pantalla.png')}  
-      style={styles.background}
-      resizeMode="cover"
-    >
+    <ImageBackground source={require('../assets/images/fondo_pantalla.png')} style={styles.background} resizeMode="cover">
       <View style={styles.overlay}>
         <View style={styles.titleContainer}>
           <View style={styles.titleBox}>
@@ -66,57 +55,14 @@ export default function Apartments() {
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-  },
-  overlay: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: 'rgba(255,255,255,0.3)', 
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  titleBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderRadius: 10,
-  },
-  icon: {
-    marginRight: 8,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  filterContainer: {
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  filterInput: {
-    width: '100%',
-    padding: 10,
-    borderWidth: 1,
-    borderRadius: 10,
-    borderColor: '#ddd',
-    backgroundColor: '#fff',
-    fontSize: 16,
-  },
-  card: {
-    marginBottom: 15,
-    borderRadius: 10,
-    elevation: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)', 
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    textAlign: 'center', 
-  },
+  background: { flex: 1 },
+  overlay: { flex: 1, padding: 20, backgroundColor: 'rgba(255,255,255,0.3)' },
+  titleContainer: { flexDirection: 'row', justifyContent: 'center', marginBottom: 20 },
+  titleBox: { flexDirection: 'row', alignItems: 'center', padding: 10, backgroundColor: 'rgba(255,255,255,0.7)', borderRadius: 10 },
+  icon: { marginRight: 8 },
+  title: { fontSize: 28, fontWeight: 'bold', color: '#333' },
+  filterContainer: { marginBottom: 20, alignItems: 'center' },
+  filterInput: { width: '100%', padding: 10, borderWidth: 1, borderRadius: 10, borderColor: '#ddd', backgroundColor: '#fff', fontSize: 16 },
+  card: { marginBottom: 15, borderRadius: 10, elevation: 3, backgroundColor: 'rgba(255,255,255,0.7)' },
+  cardTitle: { fontSize: 16, fontWeight: '600', color: '#333', textAlign: 'center' },
 });
