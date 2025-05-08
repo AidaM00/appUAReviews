@@ -1,5 +1,7 @@
-import { createStore, combineReducers, } from 'redux';
+import { createStore, combineReducers } from 'redux';
 import { GET_APARTMENTS } from './ActionTypes';
+import descripcionReducer from './descripcion';
+import ratingsReducer from './ratings'; 
 
 const initialApartmentState = {
   apartments: [],
@@ -16,7 +18,8 @@ const apartmentReducer = (state = initialApartmentState, action) => {
 
 const rootReducer = combineReducers({
   apartmentState: apartmentReducer,
-  descripcion: descripcionReducer, 
+  descripcion: descripcionReducer,
+  ratings: ratingsReducer,
 });
 
 export const store = createStore(rootReducer);

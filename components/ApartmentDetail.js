@@ -1,13 +1,27 @@
-import React from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, TouchableOpacity } from 'react-native';
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ImageBackground, Image, TouchableOpacity, ScrollView, Button, Alert } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
+import Slider from '@react-native-community/slider';
+import { setApartmentRating } from '../redux/ActionCreators';
 
 export default function ApartmentDetail({ route }) {
   const { id, name } = route.params;
   const description = useSelector(state => state.descripcion.descriptions[id]);
   const features = description?.features || [];
+
+  const [showEvaluation, setShowEvaluation] = useState(false);
+  const [newRating, setNewRating] = useState({
+    ubicacion: 5,
+    ambiente: 5,
+    limpieza: 5,
+    iluminacion: 5,
+    comodidad: 5,
+  });
+
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const apartmentImages = {
     1: require('../assets/images/apartments/1.png'),
@@ -28,7 +42,15 @@ export default function ApartmentDetail({ route }) {
   };
 
   const imageSource = apartmentImages[id];
-  const navigation = useNavigation();
+
+  const handleRatingSubmit = () => {
+    dispatch(setApartmentRating(id, {
+      userId: 'anon',
+      ratings: newRating,
+    }));
+    Alert.alert('¡Gracias!', 'Tu valoración ha sido registrada.');
+    setShowEvaluation(false);
+  };
 
   if (!description) {
     return (
@@ -37,7 +59,7 @@ export default function ApartmentDetail({ route }) {
         style={styles.background}
         resizeMode="cover"
       >
-        <View style={styles.overlay}>
+        <View style={styles.centered}>
           <Text>Información no disponible.</Text>
         </View>
       </ImageBackground>
@@ -50,17 +72,20 @@ export default function ApartmentDetail({ route }) {
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.overlay}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <View style={styles.backButtonContainer}>
-            <Icon name="arrow-left" size={20} color="#fff" />
-            <Text style={styles.backButtonText}>Back</Text>
-          </View>
-        </TouchableOpacity>
+      {/* Botón de volver fijo */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
+        <View style={styles.backButtonContainer}>
+          <Icon name="arrow-left" size={20} color="#fff" />
+          <Text style={styles.backButtonText}>Back</Text>
+        </View>
+      </TouchableOpacity>
 
+      {/* Contenido desplazable */}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Card 1: Info */}
         <View style={styles.card}>
           <Image source={imageSource} style={styles.apartmentImage} resizeMode="cover" />
           <Text style={styles.title}>{name}</Text>
@@ -75,19 +100,57 @@ export default function ApartmentDetail({ route }) {
             ))}
           </View>
         </View>
-      </View>
+
+        {/* Botón */}
+        <TouchableOpacity
+          onPress={() => setShowEvaluation(!showEvaluation)}
+          style={styles.evaluateButton}
+        >
+          <Text style={styles.evaluateButtonText}>
+            {showEvaluation ? 'Cancelar evaluación' : 'Evaluar apartamento'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Card 2: Evaluación */}
+        {showEvaluation && (
+          <View style={[styles.card, { marginTop: 20 }]}>
+            <Text style={styles.title}>Evaluar este apartamento</Text>
+            {Object.keys(newRating).map((key) => (
+              <View key={key} style={{ marginBottom: 15 }}>
+                <Text style={{ fontWeight: 'bold' }}>
+                  {key.charAt(0).toUpperCase() + key.slice(1)}: {newRating[key]}
+                </Text>
+                <Slider
+                  style={{ width: '100%', height: 40 }}
+                  minimumValue={1}
+                  maximumValue={5}
+                  step={1}
+                  value={newRating[key]}
+                  onValueChange={(value) =>
+                    setNewRating({ ...newRating, [key]: value })
+                  }
+                />
+              </View>
+            ))}
+            <Button title="Enviar valoración" onPress={handleRatingSubmit} />
+          </View>
+        )}
+      </ScrollView>
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   background: { flex: 1 },
-  overlay: {
+  centered: {
     flex: 1,
-    padding: 20,
-    backgroundColor: 'rgba(255,255,255,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  scrollContent: {
+    padding: 20,
+    paddingTop: 100,
+    paddingBottom: 40,
   },
   backButton: {
     position: 'absolute',
@@ -119,7 +182,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
-    marginTop: -80,
+    marginBottom: 20,
   },
   apartmentImage: {
     width: '100%',
@@ -154,5 +217,16 @@ const styles = StyleSheet.create({
   featureText: {
     fontSize: 16,
     color: '#333',
+  },
+  evaluateButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignSelf: 'center',
+  },
+  evaluateButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });

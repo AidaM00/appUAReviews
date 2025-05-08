@@ -1,4 +1,4 @@
-import { GET_APARTMENTS, GET_APARTMENT_DESCRIPTION } from './ActionTypes';
+import { GET_APARTMENTS, GET_APARTMENT_DESCRIPTION, SET_APARTMENT_RATING } from './ActionTypes';
 
 export const getApartments = () => {
   return {
@@ -145,3 +145,9 @@ export const getApartmentDescription = (id) => {
     },
   };
 };
+
+export const setApartmentRating = (apartmentId, ratingData) => ({
+  type: SET_APARTMENT_RATING,
+  payload: { apartmentId, ratingData }
+});
+
