@@ -1,7 +1,17 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, ImageBackground } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ImageBackground,
+  TouchableOpacity,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Home() {
+  const navigation = useNavigation();
+
   return (
     <ImageBackground
       source={require('../assets/images/fondo_home.png')}
@@ -15,12 +25,64 @@ export default function Home() {
             <Text style={styles.subtitle}>Tu plataforma de reseñas de apartamentos</Text>
 
             <Text style={[styles.paragraph, styles.blackText]}>
-              En UAReviews, te ofrecemos una plataforma completa donde podrás encontrar reseñas detalladas sobre los mejores apartamentos en tu ciudad. Con la ayuda de nuestros usuarios, podrás tomar decisiones informadas para encontrar el hogar ideal.
+              En UAReviews, te ofrecemos una plataforma completa donde podrás encontrar reseñas detalladas sobre los mejores apartamentos en tu ciudad. ¡Explora las valoraciones, elige con confianza y encuentra tu nuevo hogar ideal!
             </Text>
+          </View>
 
-            <Text style={[styles.paragraph, styles.blackText]}>
-              Ya sea que estés buscando un lugar tranquilo para vivir, o un apartamento moderno en el corazón de la ciudad, en UAReviews te ayudamos a encontrar lo que necesitas. ¡Explora las reseñas y comienza a hacer tu búsqueda hoy mismo!
-            </Text>
+          {/* Card 1 */}
+          <View style={styles.card}>
+            <View style={styles.row}>
+              <View style={styles.badge}><Text style={styles.badgeText}>1</Text></View>
+              <Text style={styles.cardIntro}>Consulta la lista completa de apartamentos disponibles.</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.cardButton}
+              onPress={() => navigation.navigate('Apartamentos')}
+            >
+              <Text style={styles.buttonText}>Ver apartamentos</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Card 2 */}
+          <View style={styles.card}>
+            <View style={styles.row}>
+              <View style={styles.badge}><Text style={styles.badgeText}>2</Text></View>
+              <Text style={styles.cardIntro}>Revisa las estadísticas globales y por apartamento.</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.cardButton}
+              onPress={() => navigation.navigate('Estadísticas')}
+            >
+              <Text style={styles.buttonText}>Estadísticas</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Card 3 */}
+          <View style={styles.card}>
+            <View style={styles.row}>
+              <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View>
+              <Text style={styles.cardIntro}>Explora la ubicación de los apartamentos en el mapa.</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.cardButton}
+              onPress={() => navigation.navigate('Mapa interactivo')}
+            >
+              <Text style={styles.buttonText}>Mapa interactivo</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Card 4 */}
+          <View style={styles.card}>
+            <View style={styles.row}>
+              <View style={styles.badge}><Text style={styles.badgeText}>4</Text></View>
+              <Text style={styles.cardIntro}>Accede a tu perfil y configuración de cuenta.</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.cardButton}
+              onPress={() => navigation.navigate('Mi cuenta')}
+            >
+              <Text style={styles.buttonText}>Mi cuenta</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -29,9 +91,7 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-  },
+  background: { flex: 1 },
   container: {
     flexGrow: 1,
     padding: 20,
@@ -39,15 +99,13 @@ const styles = StyleSheet.create({
   },
   centeredContainer: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: '0%',
   },
   transparentBox: {
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
     padding: 20,
     borderRadius: 10,
-    marginBottom: 20,
+    marginBottom: 30,
     width: '100%',
   },
   title: {
@@ -70,5 +128,49 @@ const styles = StyleSheet.create({
   },
   blackText: {
     color: '#000',
+  },
+  card: {
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
+    width: '100%',
+    elevation: 3,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  badge: {
+    backgroundColor: '#007AFF',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  badgeText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  cardIntro: {
+    fontSize: 14,
+    color: '#333',
+    flex: 1,
+    flexWrap: 'wrap',
+  },
+  cardButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
