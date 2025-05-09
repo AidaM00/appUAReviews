@@ -83,7 +83,7 @@ export default function DrawerNavigation() {
         }}
       />
       <Drawer.Screen
-        name="Mapa"
+        name="Mapa interactivo"
         component={ApartmentMap}
         options={{
           drawerIcon: ({ color, size }) => (

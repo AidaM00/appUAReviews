@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, ImageBackground, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  ImageBackground,
+  TextInput,
+} from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { getApartments, getApartmentDescription } from '../redux/ActionCreators';
 import { Card, Title } from 'react-native-paper';
@@ -15,7 +23,7 @@ export default function Apartments({ navigation }) {
   }, []);
 
   const handlePress = (item) => {
-    dispatch(getApartmentDescription(item.id)); 
+    dispatch(getApartmentDescription(item.id));
     navigation.navigate('ApartmentDetail', {
       id: item.id,
       name: item.name,
@@ -45,6 +53,20 @@ export default function Apartments({ navigation }) {
             <Text style={styles.title}>Apartamentos</Text>
           </View>
         </View>
+
+        {/* Introductorio + botón mapa */}
+        <View style={styles.introContainer}>
+          <Text style={styles.introText}>
+            Explora los apartamentos disponibles. También puedes ver su ubicación en el mapa interacivo pulsando el siguiente botón:
+          </Text>
+          <TouchableOpacity
+            style={styles.mapButton}
+            onPress={() => navigation.navigate('Mapa interactivo')}
+          >
+            <Text style={styles.mapButtonText}>Ver mapa</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.filterContainer}>
           <TextInput
             style={styles.filterInput}
@@ -53,6 +75,7 @@ export default function Apartments({ navigation }) {
             onChangeText={setCityFilter}
           />
         </View>
+
         <FlatList
           data={apartments.filter((item) =>
             item.name.toLowerCase().includes(cityFilter.toLowerCase())
@@ -83,6 +106,30 @@ const styles = StyleSheet.create({
   },
   icon: { marginRight: 8 },
   title: { fontSize: 28, fontWeight: 'bold', color: '#333' },
+
+  introContainer: {
+    marginBottom: 15,
+    backgroundColor: 'rgba(255,255,255,0.6)',
+    borderRadius: 10,
+    padding: 10,
+  },
+  introText: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 10,
+  },
+  mapButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    alignSelf: 'center',
+  },
+  mapButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+
   filterContainer: { marginBottom: 20, alignItems: 'center' },
   filterInput: {
     width: '100%',
