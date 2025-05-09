@@ -7,6 +7,7 @@ import Home from '../components/Home';
 import Apartments from '../components/Apartments';
 import ApartmentDetail from '../components/ApartmentDetail'; 
 import Statistics from '../components/Statistics';
+import ApartmentMap from '../components/ApartmentMap';
 import Account from '../components/Account';
 import { View, Image, StyleSheet } from 'react-native';
 
@@ -78,6 +79,15 @@ export default function DrawerNavigation() {
         options={{
           drawerIcon: ({ color, size }) => (
             <Icon name="bar-chart-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Mapa"
+        component={ApartmentMap}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Icon name="map-outline" color={color} size={size} />
           ),
         }}
       />

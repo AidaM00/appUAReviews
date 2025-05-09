@@ -27,6 +27,7 @@ export const getApartmentDescription = (id) => {
   const descriptions = {
     1: {
       address: 'Calle Mayor, 23, Burlada',
+      coords: { latitude: 42.8252, longitude: -1.6081 },
       features: [
         { key: 'dormitorios', label: '3 dormitorios', icon: 'bed-outline' },
         { key: 'baños', label: '2 baños', icon: 'shower' },
@@ -35,6 +36,7 @@ export const getApartmentDescription = (id) => {
     },
     2: {
       address: 'Avenida de Zaragoza, 55, Pamplona',
+      coords: { latitude: 42.8125, longitude: -1.6468 },
       features: [
         { key: 'dormitorios', label: '2 dormitorios', icon: 'bed-outline' },
         { key: 'salon', label: 'Salón espacioso', icon: 'sofa' },
@@ -43,6 +45,7 @@ export const getApartmentDescription = (id) => {
     },
     3: {
       address: 'Calle de Velázquez, 120, Madrid',
+      coords: { latitude: 40.4352, longitude: -3.6821 },
       features: [
         { key: 'dormitorios', label: '1 dormitorio', icon: 'bed-outline' },
         { key: 'baños', label: '1 baño moderno', icon: 'shower' },
@@ -51,6 +54,7 @@ export const getApartmentDescription = (id) => {
     },
     4: {
       address: 'Calle Gran Vía, 14, Madrid',
+      coords: { latitude: 40.4205, longitude: -3.7039 },
       features: [
         { key: 'salon', label: 'Salón amplio', icon: 'sofa' },
         { key: 'oficina', label: 'Espacio tipo oficina', icon: 'desk' },
@@ -58,6 +62,7 @@ export const getApartmentDescription = (id) => {
     },
     5: {
       address: 'Paseo Marítimo Pablo Ruiz Picasso, 37, Málaga',
+      coords: { latitude: 36.7196, longitude: -4.4015 },
       features: [
         { key: 'dormitorios', label: '2 dormitorios', icon: 'bed-outline' },
         { key: 'vista', label: 'Vistas al mar', icon: 'binoculars' },
@@ -66,6 +71,7 @@ export const getApartmentDescription = (id) => {
     },
     6: {
       address: 'Calle Alfonso I, 10, Zaragoza',
+      coords: { latitude: 41.6558, longitude: -0.8782 },
       features: [
         { key: 'baños', label: '1 baño', icon: 'shower' },
         { key: 'dormitorios', label: '2 dormitorios', icon: 'bed-outline' },
@@ -73,6 +79,7 @@ export const getApartmentDescription = (id) => {
     },
     7: {
       address: 'Calle Henao, 5, Bilbao',
+      coords: { latitude: 43.2630, longitude: -2.9350 },
       features: [
         { key: 'loft', label: 'Estilo industrial', icon: 'factory' },
         { key: 'salon', label: 'Salón integrado con cocina', icon: 'sofa' },
@@ -80,6 +87,7 @@ export const getApartmentDescription = (id) => {
     },
     8: {
       address: 'Calle Comercio, 18, Toledo',
+      coords: { latitude: 39.8628, longitude: -4.0273 },
       features: [
         { key: 'luz', label: 'Muy luminoso', icon: 'white-balance-sunny' },
         { key: 'terraza', label: 'Pequeña terraza', icon: 'balcony' },
@@ -87,6 +95,7 @@ export const getApartmentDescription = (id) => {
     },
     9: {
       address: 'Calle Reyes Católicos, 33, Granada',
+      coords: { latitude: 37.1740, longitude: -3.5996 },
       features: [
         { key: 'dormitorios', label: '2 habitaciones', icon: 'bed-outline' },
         { key: 'baños', label: '1 baño', icon: 'shower' },
@@ -95,6 +104,7 @@ export const getApartmentDescription = (id) => {
     },
     10: {
       address: 'Calle Emilio Lemos, 12, Sevilla',
+      coords: { latitude: 37.4086, longitude: -5.9181 },
       features: [
         { key: 'dormitorios', label: '3 dormitorios', icon: 'bed-outline' },
         { key: 'parking', label: 'Garaje privado', icon: 'garage-variant' },
@@ -102,6 +112,7 @@ export const getApartmentDescription = (id) => {
     },
     11: {
       address: 'Avenida del Puerto, 280, Valencia',
+      coords: { latitude: 39.4601, longitude: -0.3354 },
       features: [
         { key: 'ático', label: 'Ático con vistas', icon: 'binoculars' },
         { key: 'terraza', label: 'Gran terraza', icon: 'balcony' },
@@ -109,6 +120,7 @@ export const getApartmentDescription = (id) => {
     },
     12: {
       address: 'Carrer de Verdi, 45, Barcelona',
+      coords: { latitude: 41.4057, longitude: 2.1592 },
       features: [
         { key: 'exclusivo', label: 'Diseño exclusivo', icon: 'diamond-stone' },
         { key: 'baños', label: '2 baños', icon: 'shower' },
@@ -116,6 +128,7 @@ export const getApartmentDescription = (id) => {
     },
     13: {
       address: 'Calle Toro, 9, Salamanca',
+      coords: { latitude: 40.9642, longitude: -5.6637 },
       features: [
         { key: 'estudio', label: 'Estudio compacto', icon: 'laptop' },
         { key: 'terraza', label: 'Con balcón', icon: 'balcony' },
@@ -123,6 +136,7 @@ export const getApartmentDescription = (id) => {
     },
     14: {
       address: 'Calle Corrida, 22, Gijón',
+      coords: { latitude: 43.5420, longitude: -5.6647 },
       features: [
         { key: 'familia', label: 'Ideal para familias', icon: 'account-group' },
         { key: 'jardin', label: 'Pequeño jardín', icon: 'tree-outline' },
@@ -130,6 +144,7 @@ export const getApartmentDescription = (id) => {
     },
     15: {
       address: 'Calle Uría, 50, Oviedo',
+      coords: { latitude: 43.3619, longitude: -5.8483 },
       features: [
         { key: 'reformado', label: 'Piso recientemente reformado', icon: 'hammer' },
         { key: 'dormitorios', label: '2 dormitorios', icon: 'bed-outline' },
