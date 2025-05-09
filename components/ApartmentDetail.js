@@ -13,11 +13,11 @@ export default function ApartmentDetail({ route }) {
 
   const [showEvaluation, setShowEvaluation] = useState(false);
   const [newRating, setNewRating] = useState({
-    ubicacion: 5,
-    ambiente: 5,
-    limpieza: 5,
-    iluminacion: 5,
-    comodidad: 5,
+    Ubicación: 5,
+    Ambiente: 5,
+    Limpieza: 5,
+    Iluminación: 5,
+    Comodidad: 5,
   });
 
   const dispatch = useDispatch();
