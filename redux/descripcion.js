@@ -1,12 +1,10 @@
 import { GET_APARTMENT_DESCRIPTION } from './ActionTypes';
 
 const initialState = {
-  descriptions: {
-    
-  },
+  descriptions: {}
 };
 
-const descripcionReducer = (state = { descriptions: {} }, action) => {
+const descripcionReducer = (state = initialState, action) => {
   switch (action.type) {
     case GET_APARTMENT_DESCRIPTION:
       return {

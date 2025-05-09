@@ -23,12 +23,14 @@ export default function ApartmentMap() {
   }, []);
 
   useEffect(() => {
-    if (apartments.length && Object.keys(descriptions).length === 0) {
+    if (apartments.length) {
       apartments.forEach((apt) => {
-        dispatch(getApartmentDescription(apt.id));
+        if (!descriptions[apt.id]) {
+          dispatch(getApartmentDescription(apt.id));
+        }
       });
     }
-  }, [apartments]);
+  }, [apartments, descriptions]);
 
   const apartmentsWithCoords = apartments.filter((apt) => {
     const coords = descriptions[apt.id]?.coords;
