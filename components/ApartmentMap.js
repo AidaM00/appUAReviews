@@ -54,12 +54,11 @@ export default function ApartmentMap() {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Texto superpuesto */}
+      
       <Text style={styles.overlayText}>
         🗺️ Navega y descubre los apartamentos disponibles
       </Text>
 
-      {/* Mapa */}
       <MapView style={styles.map} initialRegion={initialRegion}>
         {apartmentsWithCoords.map((apt) => (
           <Marker
