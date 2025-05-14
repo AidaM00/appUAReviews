@@ -44,8 +44,8 @@ export const getApartmentDescription = (id) => {
       ],
     },
     3: {
-      address: 'Calle de la Salud, 4, Madrid',
-      coords: { latitude: 40.419090, longitude: -3.703584 },
+      address: 'Calle Velázquez, 66, Madrid',
+      coords: { latitude: 40.428491, longitude: -3.683620 },
       features: [
         { key: 'dormitorios', label: '1 dormitorio', icon: 'bed-outline' },
         { key: 'baños', label: '1 baño moderno', icon: 'shower' },
