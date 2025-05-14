@@ -1,4 +1,3 @@
-// components/DrawerNavigation.js
 import React from 'react';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -9,6 +8,7 @@ import ApartmentDetail from '../components/ApartmentDetail';
 import Statistics from '../components/Statistics';
 import ApartmentMap from '../components/ApartmentMap';
 import Account from '../components/Account';
+import Profile from '../components/Profile'; 
 import { View, Image, StyleSheet } from 'react-native';
 
 const Drawer = createDrawerNavigator();
@@ -28,22 +28,37 @@ function CustomDrawerContent(props) {
   );
 }
 
-function AppStack() {
+// STACK para Apartamentos + ApartmentDetail
+function ApartmentsStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen 
         name="Apartments" 
         component={Apartments} 
-        options={{
-          headerShown: false, 
-        }} 
+        options={{ headerShown: false }} 
       />
       <Stack.Screen 
         name="ApartmentDetail" 
         component={ApartmentDetail} 
-        options={{
-          headerShown: false,  
-        }} 
+        options={{ headerShown: false }} 
+      />
+    </Stack.Navigator>
+  );
+}
+
+// STACK para Cuenta + Perfil
+function AccountStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen 
+        name="Account" 
+        component={Account} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="Profile" 
+        component={Profile} 
+        options={{ headerShown: false }} 
       />
     </Stack.Navigator>
   );
@@ -66,7 +81,7 @@ export default function DrawerNavigation() {
       />
       <Drawer.Screen
         name="Apartamentos"
-        component={AppStack}  
+        component={ApartmentsStack}
         options={{
           drawerIcon: ({ color, size }) => (
             <Icon name="business-outline" color={color} size={size} />
@@ -93,7 +108,7 @@ export default function DrawerNavigation() {
       />
       <Drawer.Screen
         name="Mi cuenta"
-        component={Account}
+        component={AccountStack}
         options={{
           drawerIcon: ({ color, size }) => (
             <Icon name="person-outline" color={color} size={size} />
