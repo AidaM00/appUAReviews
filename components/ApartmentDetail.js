@@ -1,15 +1,6 @@
 import React, { useState, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ImageBackground,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  Button,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Image, TouchableOpacity, ScrollView, Button, Alert } from 'react-native';
+
 import { useSelector, useDispatch } from 'react-redux';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -19,6 +10,7 @@ import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
 import * as MailComposer from 'expo-mail-composer';
+import { auth } from '../firebase/config';
 
 export default function ApartmentDetail({ route }) {
   const { id, name } = route.params;
@@ -59,9 +51,14 @@ export default function ApartmentDetail({ route }) {
   const imageSource = apartmentImages[id];
 
   const handleRatingSubmit = () => {
+    if (!auth.currentUser) {
+      Alert.alert('Error', 'Debes iniciar sesión para valorar este apartamento.');
+      return;
+    }
+
     dispatch(
       setApartmentRating(id, {
-        userId: 'anon',
+        userId: auth.currentUser.uid,
         ratings: newRating,
       }),
     );
