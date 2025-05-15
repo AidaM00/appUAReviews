@@ -1,15 +1,6 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ImageBackground,
-  ScrollView,
-  Dimensions,
-  TouchableOpacity,
-  Modal,
-  Pressable,
-} from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, ScrollView, Dimensions, TouchableOpacity, Modal, Pressable } from 'react-native';
+
 import { useSelector } from 'react-redux';
 import { BarChart } from 'react-native-chart-kit';
 
@@ -272,6 +263,7 @@ const styles = StyleSheet.create({
     color: '#007AFF',
   },
   apartmentButton: {
+    width: 90,
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 10,
