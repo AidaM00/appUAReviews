@@ -1,10 +1,24 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, TouchableOpacity, ScrollView, Button, Alert } from 'react-native';
+import React, { useState, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ImageBackground,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Button,
+  Alert,
+} from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
 import { setApartmentRating } from '../redux/ActionCreators';
+import { captureRef } from 'react-native-view-shot';
+import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system';
+import * as MailComposer from 'expo-mail-composer';
 
 export default function ApartmentDetail({ route }) {
   const { id, name } = route.params;
@@ -22,6 +36,7 @@ export default function ApartmentDetail({ route }) {
 
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const viewRef = useRef();
 
   const apartmentImages = {
     1: require('../assets/images/apartments/1.png'),
@@ -44,12 +59,77 @@ export default function ApartmentDetail({ route }) {
   const imageSource = apartmentImages[id];
 
   const handleRatingSubmit = () => {
-    dispatch(setApartmentRating(id, {
-      userId: 'anon',
-      ratings: newRating,
-    }));
+    dispatch(
+      setApartmentRating(id, {
+        userId: 'anon',
+        ratings: newRating,
+      }),
+    );
     Alert.alert('¡Gracias!', 'Tu valoración ha sido registrada.');
     setShowEvaluation(false);
+  };
+
+  // Función para compartir información del apartamento solo por email usando MailComposer
+  const handleShareEmail = async () => {
+    try {
+      // Captura que vamos a mandar
+      const uri = await captureRef(viewRef, {
+        format: 'png',
+        quality: 0.9,
+      });
+
+      // Copia la imagen a cache para adjuntarla en el correo
+      const fileUri = `${FileSystem.cacheDirectory}apartment-${id}.png`;
+      await FileSystem.copyAsync({ from: uri, to: fileUri });
+
+      const isAvailable = await MailComposer.isAvailableAsync();
+      if (!isAvailable) {
+        Alert.alert('Error', 'No hay aplicación de correo disponible.');
+        return;
+      }
+
+      await MailComposer.composeAsync({
+        subject: 'Apartamento UA',
+        body: `¡Mira este apartamento "${name}" de la cadena UA!`,
+        attachments: [fileUri],
+        isHtml: false,
+      });
+    } catch (error) {
+      console.log('Error al compartir por email:', error);
+      Alert.alert('Error', 'No se pudo compartir el email.');
+    }
+  };
+
+  // Función para compartir en otras apps de redes sociales usando Sharing
+  const handleShareOther = async () => {
+    try {
+      const uri = await captureRef(viewRef, {
+        format: 'png',
+        quality: 0.9,
+      });
+
+      const fileUri = `${FileSystem.cacheDirectory}apartment-${id}.png`;
+      await FileSystem.copyAsync({ from: uri, to: fileUri });
+
+      const shareUri = fileUri.startsWith('file://')
+        ? fileUri
+        : `file://${fileUri}`;
+
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert('Error', 'No hay aplicaciones disponibles para compartir.');
+        return;
+      }
+
+      await Sharing.shareAsync(shareUri, {
+        dialogTitle: 'Compartir apartamento',
+        mimeType: 'image/png',
+        UTI: 'public.png',
+        message: `¡Mira este apartamento "${name}" de la cadena UA!`,
+      });
+    } catch (error) {
+      console.log('Error al compartir:', error);
+      Alert.alert('Error', 'No se pudo compartir la imagen.');
+    }
   };
 
   if (!description) {
@@ -72,7 +152,6 @@ export default function ApartmentDetail({ route }) {
       style={styles.background}
       resizeMode="cover"
     >
-      {/* Botón de volver fijo */}
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => navigation.goBack()}
@@ -83,25 +162,32 @@ export default function ApartmentDetail({ route }) {
         </View>
       </TouchableOpacity>
 
-      {/* Contenido desplazable */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Card 1: Info */}
-        <View style={styles.card}>
-          <Image source={imageSource} style={styles.apartmentImage} resizeMode="cover" />
-          <Text style={styles.title}>{name}</Text>
-          <Text style={styles.address}>{description.address}</Text>
-
-          <View style={styles.features}>
-            {features.map((item) => (
-              <View key={item.key} style={styles.featureRow}>
-                <Icon name={item.icon} size={24} color="#4a4a4a" style={styles.featureIcon} />
-                <Text style={styles.featureText}>{item.label}</Text>
-              </View>
-            ))}
+        <View ref={viewRef} collapsable={false}>
+          <View style={styles.card}>
+            <Image
+              source={imageSource}
+              style={styles.apartmentImage}
+              resizeMode="cover"
+            />
+            <Text style={styles.title}>{name}</Text>
+            <Text style={styles.address}>{description.address}</Text>
+            <View style={styles.features}>
+              {features.map(item => (
+                <View key={item.key} style={styles.featureRow}>
+                  <Icon
+                    name={item.icon}
+                    size={24}
+                    color="#4a4a4a"
+                    style={styles.featureIcon}
+                  />
+                  <Text style={styles.featureText}>{item.label}</Text>
+                </View>
+              ))}
+            </View>
           </View>
         </View>
 
-        {/* Botón */}
         <TouchableOpacity
           onPress={() => setShowEvaluation(!showEvaluation)}
           style={styles.evaluateButton}
@@ -111,14 +197,13 @@ export default function ApartmentDetail({ route }) {
           </Text>
         </TouchableOpacity>
 
-        {/* Card 2: Evaluación */}
         {showEvaluation && (
           <View style={[styles.card, { marginTop: 20 }]}>
             <Text style={styles.title}>Evaluar este apartamento</Text>
-            {Object.keys(newRating).map((key) => (
+            {Object.keys(newRating).map(key => (
               <View key={key} style={{ marginBottom: 15 }}>
                 <Text style={{ fontWeight: 'bold' }}>
-                  {key.charAt(0).toUpperCase() + key.slice(1)}: {newRating[key]}
+                  {key}: {newRating[key]}
                 </Text>
                 <Slider
                   style={{ width: '100%', height: 40 }}
@@ -126,7 +211,7 @@ export default function ApartmentDetail({ route }) {
                   maximumValue={5}
                   step={1}
                   value={newRating[key]}
-                  onValueChange={(value) =>
+                  onValueChange={value =>
                     setNewRating({ ...newRating, [key]: value })
                   }
                 />
@@ -135,6 +220,18 @@ export default function ApartmentDetail({ route }) {
             <Button title="Enviar valoración" onPress={handleRatingSubmit} />
           </View>
         )}
+
+        <View style={styles.shareRow}>
+          <TouchableOpacity onPress={handleShareEmail} style={[styles.shareButtonRow, { marginRight: 10 }]}>
+            <Icon name="email-send" size={20} color="#fff" style={{ marginRight: 6 }} />
+            <Text style={styles.shareButtonText}>Mail</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleShareOther} style={[styles.shareButtonRow, { backgroundColor: '#4285F4' }]}>
+            <Icon name="share-variant" size={20} color="#fff" style={{ marginRight: 6 }} />
+            <Text style={styles.shareButtonText}>Social Media</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </ImageBackground>
   );
@@ -219,7 +316,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   evaluateButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#FF3B30',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 10,
@@ -229,4 +326,34 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  shareButton: {
+    marginTop: 10,
+    backgroundColor: '#34A853',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignSelf: 'center',
+  },
+  shareButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  shareRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+
+  shareButtonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#34A853',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    flex: 1,
+    justifyContent: 'center',
+  },
+
 });
