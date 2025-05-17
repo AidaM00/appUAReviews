@@ -1,28 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, ScrollView, Dimensions, TouchableOpacity, Modal, Pressable } from 'react-native';
-
-import { useSelector } from 'react-redux';
 import { BarChart } from 'react-native-chart-kit';
+import { collection, getDocs } from 'firebase/firestore';
+import { auth, db } from '../firebase/config';
+
+const criterios = ['Ubicación', 'Ambiente', 'Limpieza', 'Iluminación', 'Comodidad'];
 
 export default function Statistics() {
-  const ratingsByApartment = useSelector(
-    (state) => state.ratings.ratingsByApartment
-  );
-  const apartments = useSelector((state) => state.apartmentState.apartments);
-
-  const allRatings = Object.values(ratingsByApartment).flat();
-  const criterios = ['Ubicación', 'Ambiente', 'Limpieza', 'Iluminación', 'Comodidad'];
-  const totalVotos = allRatings.length;
-
+  const [valoraciones, setValoraciones] = useState([]);
+  const [ratingsByApartment, setRatingsByApartment] = useState({});
   const [selectedApartmentId, setSelectedApartmentId] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
+  useEffect(() => {
+    const fetchValoraciones = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'valoraciones'));
+        const datos = querySnapshot.docs.map(doc => doc.data());
+
+        // Agrupar por apartmentId
+        const agrupadas = datos.reduce((acc, curr) => {
+          const id = curr.apartmentId;
+          if (!acc[id]) acc[id] = [];
+          acc[id].push(curr);
+          return acc;
+        }, {});
+        setValoraciones(datos);
+        setRatingsByApartment(agrupadas);
+      } catch (error) {
+        console.error('Error al obtener valoraciones:', error);
+      }
+    };
+
+    fetchValoraciones();
+  }, []);
+
+  const allRatings = valoraciones;
+  const totalVotos = allRatings.length;
+
   const promedios = criterios.reduce((acc, criterio) => {
     const values = allRatings.map(r => r.ratings[criterio]).filter(Boolean);
-    const average =
-      values.length > 0
-        ? (values.reduce((sum, val) => sum + val, 0) / values.length).toFixed(2)
-        : 'N/A';
+    const average = values.length > 0
+      ? (values.reduce((sum, val) => sum + val, 0) / values.length).toFixed(2)
+      : 'N/A';
     acc[criterio] = { average };
     return acc;
   }, {});
@@ -32,30 +52,25 @@ export default function Statistics() {
     setModalVisible(true);
   };
 
-  const apartmentRatings = selectedApartmentId
-    ? ratingsByApartment[selectedApartmentId] || []
-    : [];
+  const apartmentRatings = selectedApartmentId ? (ratingsByApartment[selectedApartmentId] || []) : [];
 
   const resumen = criterios.reduce((acc, criterio) => {
     const valores = apartmentRatings.map(r => r.ratings[criterio]).filter(Boolean);
-    acc[criterio] =
-      valores.length > 0
-        ? (valores.reduce((s, v) => s + v, 0) / valores.length).toFixed(2)
-        : 'N/A';
+    acc[criterio] = valores.length > 0
+      ? (valores.reduce((s, v) => s + v, 0) / valores.length).toFixed(2)
+      : 'N/A';
     return acc;
   }, {});
 
-  // Ranking
   const apartmentScores = Object.entries(ratingsByApartment).map(([id, ratings]) => {
     const promedioGlobal = ratings.reduce((sum, r) => {
       const total = criterios.reduce((a, c) => a + r.ratings[c], 0);
       return sum + total / criterios.length;
     }, 0) / ratings.length;
 
-    const apartmentInfo = apartments.find(a => a.id === parseInt(id));
     return {
       id: parseInt(id),
-      name: apartmentInfo?.name || `Apartamento ${id}`,
+      name: `Apartamento ${id}`,
       score: promedioGlobal.toFixed(2),
     };
   });
@@ -85,7 +100,6 @@ export default function Statistics() {
             <View style={styles.sectionBox}>
               <Text style={styles.sectionTitle}>🏆 Mejores apartamentos valorados</Text>
               <Text style={styles.label}>Estos son los apartamentos favoritos de los usuarios:</Text>
-              <Text></Text>
               {top3.map((apt, index) => (
                 <Text key={apt.id} style={styles.topItem}>
                   {medals[index]} {apt.name} — {apt.score}
@@ -99,13 +113,9 @@ export default function Statistics() {
             <Text style={styles.sectionTitle}>
               ⭐ Valoraciones generales ({totalVotos} votos)
             </Text>
-            <Text style={styles.label}>Conoce las puntuaciones medias de los apartamentos: </Text>
-          <Text></Text>
             {criterios.map((key) => (
               <View key={key} style={styles.row}>
-                <Text style={styles.label}>
-                  {key.charAt(0).toUpperCase() + key.slice(1)}:
-                </Text>
+                <Text style={styles.label}>{key}:</Text>
                 <Text style={styles.value}>{promedios[key].average}</Text>
               </View>
             ))}
@@ -154,7 +164,6 @@ export default function Statistics() {
           <View style={styles.sectionBox}>
             <Text style={styles.sectionTitle}>🏠 Por apartamento</Text>
             <Text style={styles.label}>Selecciona un apartamento para conocer su puntuación:</Text>
-
             <View style={styles.buttonsContainer}>
               {Array.from({ length: 15 }, (_, i) => i + 1).map((id) => {
                 const hasRatings = !!ratingsByApartment[id];
@@ -196,7 +205,6 @@ export default function Statistics() {
                       {key}: {resumen[key]}
                     </Text>
                   ))}
-                  <Text></Text>
                   <Text style={styles.modalStat}>
                     Total votos: {apartmentRatings.length}
                   </Text>
@@ -215,6 +223,7 @@ export default function Statistics() {
     </ImageBackground>
   );
 }
+
 
 const styles = StyleSheet.create({
   background: { flex: 1 },
@@ -268,6 +277,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 10,
     margin: 5,
+    alignItems:'center',
   },
   apartmentButtonText: {
     color: '#fff',

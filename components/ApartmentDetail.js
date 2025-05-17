@@ -10,7 +10,9 @@ import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
 import * as MailComposer from 'expo-mail-composer';
-import { auth } from '../firebase/config';
+import { auth, db } from '../firebase/config';
+
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
 
 export default function ApartmentDetail({ route }) {
   const { id, name } = route.params;
@@ -50,21 +52,27 @@ export default function ApartmentDetail({ route }) {
 
   const imageSource = apartmentImages[id];
 
-  const handleRatingSubmit = () => {
-    if (!auth.currentUser) {
-      Alert.alert('Error', 'Debes iniciar sesión para valorar este apartamento.');
-      return;
-    }
+const handleRatingSubmit = async () => {
+  if (!auth.currentUser) {
+    Alert.alert('Error', 'Debes iniciar sesión para valorar este apartamento.');
+    return;
+  }
 
-    dispatch(
-      setApartmentRating(id, {
-        userId: auth.currentUser.uid,
-        ratings: newRating,
-      }),
-    );
+  try {
+    await addDoc(collection(db, 'valoraciones'), {
+      userId: auth.currentUser.uid,
+      apartmentId: id,
+      ratings: newRating,
+      createdAt: Timestamp.now(),
+    });
+
     Alert.alert('¡Gracias!', 'Tu valoración ha sido registrada.');
     setShowEvaluation(false);
-  };
+  } catch (error) {
+    console.error('Error al guardar la valoración:', error);
+    Alert.alert('Error', 'No se pudo guardar la valoración.');
+  }
+};
 
   // Función para compartir información del apartamento solo por email usando MailComposer
   const handleShareEmail = async () => {
