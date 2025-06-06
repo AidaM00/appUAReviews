@@ -10,7 +10,7 @@ import * as FileSystem from 'expo-file-system';
 
 export default function Profile() {
   const [userData, setUserData] = useState(null);
-  const [photo, setPhoto] = useState(null);
+  const [photoBase64, setPhotoBase64] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const navigation = useNavigation();
@@ -26,12 +26,24 @@ export default function Profile() {
         const userDoc = await getDoc(doc(db, 'usuarios', user.uid));
         if (userDoc.exists()) {
           setUserData(userDoc.data());
-          setPhoto(userDoc.data().fotoURL);
+          setPhotoBase64(userDoc.data().fotoBase64 || null);
         }
       }
       setLoading(false);
     } catch (error) {
       Alert.alert('Error', 'Error al cargar datos.');
+    }
+  };
+
+  const imageToBase64 = async (uri) => {
+    try {
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      return base64;
+    } catch (err) {
+      Alert.alert('Error', 'No se pudo convertir la imagen.');
+      return null;
     }
   };
 
@@ -44,14 +56,13 @@ export default function Profile() {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
+      quality: 0.7,
     });
 
     if (!result.canceled) {
-      const fileName = result.assets[0].uri.split('/').pop();
-      const localUri = FileSystem.documentDirectory + fileName;
-      await FileSystem.copyAsync({ from: result.assets[0].uri, to: localUri });
-      setPhoto(localUri);
+      const uri = result.assets[0].uri;
+      const base64 = await imageToBase64(uri);
+      if (base64) setPhotoBase64(base64);
     }
   };
 
@@ -64,14 +75,13 @@ export default function Profile() {
 
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
+      quality: 0.7,
     });
 
     if (!result.canceled) {
-      const fileName = result.assets[0].uri.split('/').pop();
-      const localUri = FileSystem.documentDirectory + fileName;
-      await FileSystem.copyAsync({ from: result.assets[0].uri, to: localUri });
-      setPhoto(localUri);
+      const uri = result.assets[0].uri;
+      const base64 = await imageToBase64(uri);
+      if (base64) setPhotoBase64(base64);
     }
   };
 
@@ -93,10 +103,10 @@ export default function Profile() {
       if (user) {
         await updateDoc(doc(db, 'usuarios', user.uid), {
           ...userData,
-          fotoURL: photo,
+          fotoBase64: photoBase64,
         });
 
-        await updateProfile(user, { photoURL: photo });
+        await updateProfile(user, { photoURL: photoBase64 ? `data:image/jpeg;base64,${photoBase64}` : null });
         await reload(user);
 
         Alert.alert('¡Guardado!', 'Tus cambios fueron aplicados.', [
@@ -142,7 +152,6 @@ export default function Profile() {
       style={styles.background}
       resizeMode="cover"
     >
-      {/* Botón de volver */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <View style={styles.backButtonContainer}>
           <Icon name="arrow-left" size={20} color="#fff" />
@@ -151,16 +160,14 @@ export default function Profile() {
       </TouchableOpacity>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Foto perfil */}
         <TouchableOpacity onPress={choosePhoto} style={{ alignSelf: 'center', marginBottom: 20 }}>
-          {photo ? (
-            <Image source={{ uri: photo }} style={{ width: 120, height: 120, borderRadius: 60 }} />
+          {photoBase64 ? (
+            <Image source={{ uri: `data:image/jpeg;base64,${photoBase64}` }} style={{ width: 120, height: 120, borderRadius: 60 }} />
           ) : (
             <View style={{ width: 120, height: 120, borderRadius: 60, backgroundColor: '#ccc' }} />
           )}
         </TouchableOpacity>
 
-        {/* Inputs */}
         <TextInput style={styles.input} placeholder="Nombre" value={userData.nombre} onChangeText={(text) => setUserData({ ...userData, nombre: text })} />
         <TextInput style={styles.input} placeholder="Apellidos" value={userData.apellidos} onChangeText={(text) => setUserData({ ...userData, apellidos: text })} />
         <TextInput style={styles.input} placeholder="Edad" value={userData.edad} keyboardType="numeric" onChangeText={(text) => setUserData({ ...userData, edad: text })} />
@@ -168,7 +175,6 @@ export default function Profile() {
         <TextInput style={styles.input} placeholder="Ciudad" value={userData.ciudad} onChangeText={(text) => setUserData({ ...userData, ciudad: text })} />
         <TextInput style={styles.input} placeholder="Código postal" value={userData.codigoPostal} keyboardType="numeric" onChangeText={(text) => setUserData({ ...userData, codigoPostal: text })} />
 
-        {/* Botón guardar */}
         <TouchableOpacity style={styles.evaluateButton} onPress={handleSave}>
           <Text style={styles.evaluateButtonText}>Guardar cambios</Text>
         </TouchableOpacity>
