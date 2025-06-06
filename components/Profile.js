@@ -2,15 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Alert, ImageBackground, ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { auth, db } from '../firebase/config';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { updateProfile, reload } from 'firebase/auth';
+import { reload } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
+import axios from 'axios';
 
 export default function Profile() {
   const [userData, setUserData] = useState(null);
-  const [photoBase64, setPhotoBase64] = useState(null);
+  const [photoUrl, setPhotoUrl] = useState(null);
+  const [localPhoto, setLocalPhoto] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const navigation = useNavigation();
@@ -25,8 +27,9 @@ export default function Profile() {
       if (user) {
         const userDoc = await getDoc(doc(db, 'usuarios', user.uid));
         if (userDoc.exists()) {
-          setUserData(userDoc.data());
-          setPhotoBase64(userDoc.data().fotoBase64 || null);
+          const data = userDoc.data();
+          setUserData(data);
+          setPhotoUrl(data.fotoURL || null);
         }
       }
       setLoading(false);
@@ -37,13 +40,33 @@ export default function Profile() {
 
   const imageToBase64 = async (uri) => {
     try {
-      const base64 = await FileSystem.readAsStringAsync(uri, {
+      return await FileSystem.readAsStringAsync(uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
-      return base64;
     } catch (err) {
       Alert.alert('Error', 'No se pudo convertir la imagen.');
       return null;
+    }
+  };
+
+  const uploadToImgur = async (base64Image) => {
+    try {
+      const response = await axios.post(
+        'https://api.imgur.com/3/image',
+        {
+          image: base64Image,
+          type: 'base64',
+        },
+        {
+          headers: {
+            Authorization: 'Client-ID 95a39a9f5968fcb',
+          },
+        }
+      );
+      return response.data.data.link;
+    } catch (error) {
+      console.error('Error al subir a Imgur:', error);
+      throw new Error('No se pudo subir la imagen.');
     }
   };
 
@@ -60,9 +83,7 @@ export default function Profile() {
     });
 
     if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      const base64 = await imageToBase64(uri);
-      if (base64) setPhotoBase64(base64);
+      setLocalPhoto(result.assets[0].uri);
     }
   };
 
@@ -79,9 +100,7 @@ export default function Profile() {
     });
 
     if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      const base64 = await imageToBase64(uri);
-      if (base64) setPhotoBase64(base64);
+      setLocalPhoto(result.assets[0].uri);
     }
   };
 
@@ -100,19 +119,22 @@ export default function Profile() {
   const handleSave = async () => {
     try {
       const user = auth.currentUser;
-      if (user) {
-        await updateDoc(doc(db, 'usuarios', user.uid), {
-          ...userData,
-          fotoBase64: photoBase64,
-        });
+      let imageUrl = photoUrl;
 
-        await updateProfile(user, { photoURL: photoBase64 ? `data:image/jpeg;base64,${photoBase64}` : null });
-        await reload(user);
-
-        Alert.alert('¡Guardado!', 'Tus cambios fueron aplicados.', [
-          { text: 'OK', onPress: () => navigation.goBack() }
-        ]);
+      if (localPhoto) {
+        const base64 = await imageToBase64(localPhoto);
+        imageUrl = await uploadToImgur(base64);
       }
+
+      await updateDoc(doc(db, 'usuarios', user.uid), {
+        ...userData,
+        fotoURL: imageUrl,
+      });
+
+      await reload(user);
+      Alert.alert('¡Guardado!', 'Tus cambios fueron aplicados.', [
+        { text: 'OK', onPress: () => navigation.goBack() }
+      ]);
     } catch (error) {
       Alert.alert('Error', 'Hubo un problema al guardar los cambios.');
     }
@@ -161,8 +183,10 @@ export default function Profile() {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <TouchableOpacity onPress={choosePhoto} style={{ alignSelf: 'center', marginBottom: 20 }}>
-          {photoBase64 ? (
-            <Image source={{ uri: `data:image/jpeg;base64,${photoBase64}` }} style={{ width: 120, height: 120, borderRadius: 60 }} />
+          {localPhoto ? (
+            <Image source={{ uri: localPhoto }} style={{ width: 120, height: 120, borderRadius: 60 }} />
+          ) : photoUrl ? (
+            <Image source={{ uri: photoUrl }} style={{ width: 120, height: 120, borderRadius: 60 }} />
           ) : (
             <View style={{ width: 120, height: 120, borderRadius: 60, backgroundColor: '#ccc' }} />
           )}

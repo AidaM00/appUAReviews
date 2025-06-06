@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Alert, ImageBackground, ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { login, register, logout } from '../firebase/auth';
 import { auth, db } from '../firebase/config';
-import { updateProfile, onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
+import axios from 'axios';
 
 export default function Account() {
   const [mode, setMode] = useState(null);
@@ -58,6 +59,38 @@ export default function Account() {
     }
   };
 
+  const imageToBase64 = async (uri) => {
+    try {
+      return await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+    } catch (err) {
+      Alert.alert('Error', 'No se pudo convertir la imagen.');
+      return null;
+    }
+  };
+
+  const uploadToImgur = async (base64Image) => {
+    try {
+      const response = await axios.post(
+        'https://api.imgur.com/3/image',
+        {
+          image: base64Image,
+          type: 'base64',
+        },
+        {
+          headers: {
+            Authorization: 'Client-ID 95a39a9f5968fcb',
+          },
+        }
+      );
+      return response.data.data.link;
+    } catch (error) {
+      console.error('Error subiendo a Imgur:', error);
+      throw new Error('No se pudo subir la imagen.');
+    }
+  };
+
   const pickFromGallery = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -66,7 +99,7 @@ export default function Account() {
     }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
+      quality: 0.7,
     });
     if (!result.canceled) {
       setPhoto(result.assets[0].uri);
@@ -81,7 +114,7 @@ export default function Account() {
     }
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
+      quality: 0.7,
     });
     if (!result.canceled) {
       setPhoto(result.assets[0].uri);
@@ -119,18 +152,12 @@ export default function Account() {
         Alert.alert('Campos incompletos', 'Por favor, rellena todos los campos.');
         return;
       }
-      const fileName = photo.split('/').pop();
-      const localUri = FileSystem.documentDirectory + fileName;
 
-      await FileSystem.copyAsync({
-        from: photo,
-        to: localUri,
-      });
+      const base64 = await imageToBase64(photo);
+      const imgurUrl = await uploadToImgur(base64);
 
       const userCredential = await register(email, password);
       const user = userCredential.user;
-
-      await updateProfile(user, { photoURL: localUri });
 
       await setDoc(doc(db, 'usuarios', user.uid), {
         email: user.email,
@@ -140,11 +167,12 @@ export default function Account() {
         telefono,
         ciudad,
         codigoPostal,
-        fotoURL: localUri,
+        fotoURL: imgurUrl,
       });
 
       Alert.alert('¡Registro exitoso!', 'Tu cuenta ha sido creada.');
     } catch (err) {
+      console.error('ERROR guardando en Firestore:', err);
       Alert.alert('Error', mapFirebaseError(err));
     }
   };
@@ -247,7 +275,6 @@ export default function Account() {
             {userData?.fotoURL && (
               <Image source={{ uri: userData.fotoURL }} style={{ width: 120, height: 120, borderRadius: 60, alignSelf: 'center', marginVertical: 10 }} />
             )}
-            <Text></Text>
             <Text style={styles.description}>
               Desde aquí puedes modificar tus datos de cuenta y añadir valoraciones a los apartamentos.
             </Text>
