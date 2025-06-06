@@ -5,10 +5,10 @@ import { auth, db } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import axios from 'axios';
+import BackToHomeButton from './BackToHomeButton';
 
 export default function Account() {
   const [mode, setMode] = useState(null);
@@ -215,14 +215,7 @@ export default function Account() {
 
   return (
     <ImageBackground source={require('../assets/images/fondo_cuenta.png')} style={styles.background} resizeMode="cover">
-      {(mode || currentUser) && (
-        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <View style={styles.backButtonContainer}>
-            <Icon name="arrow-left" size={20} color="#fff" />
-            <Text style={styles.backButtonText}>Back</Text>
-          </View>
-        </TouchableOpacity>
-      )}
+      {(mode || currentUser) && <BackToHomeButton />}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {!currentUser && !mode && (
           <>
@@ -278,7 +271,7 @@ export default function Account() {
             <Text style={styles.description}>
               Desde aquí puedes modificar tus datos de cuenta y añadir valoraciones a los apartamentos.
             </Text>
-            <TouchableOpacity style={styles.evaluateButton} onPress={() => navigation.navigate('Profile')}>
+            <TouchableOpacity style={styles.evaluateButton} onPress={() => navigation.navigate('Perfil')}>
               <Text style={styles.evaluateButtonText}>Ver / Editar perfil</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.evaluateButton} onPress={() => navigation.navigate('Apartamentos')}>
@@ -297,17 +290,6 @@ export default function Account() {
 const styles = StyleSheet.create({
   background: { flex: 1 },
   scrollContent: { padding: 20, paddingTop: 100, paddingBottom: 40 },
-  backButton: { position: 'absolute', top: 40, left: 20, zIndex: 10 },
-  backButtonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#000',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 30,
-    justifyContent: 'center',
-  },
-  backButtonText: { color: '#fff', fontSize: 14, marginLeft: 10 },
   title: { fontSize: 28, fontWeight: 'bold', color: '#4A90E2', textAlign: 'center', marginBottom: 30 },
   subtitle: { fontSize: 24, color: '#333', textAlign: 'center', marginBottom: 20 },
   input: {

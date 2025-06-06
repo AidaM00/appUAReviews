@@ -174,10 +174,10 @@ export default function Profile() {
       style={styles.background}
       resizeMode="cover"
     >
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Mi cuenta')}>
         <View style={styles.backButtonContainer}>
           <Icon name="arrow-left" size={20} color="#fff" />
-          <Text style={styles.backButtonText}>Back</Text>
+          <Text style={styles.backButtonText}>Atrás</Text>
         </View>
       </TouchableOpacity>
 

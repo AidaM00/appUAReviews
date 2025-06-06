@@ -91,7 +91,7 @@ export default function DrawerNavigation() {
         }}
       />
       <Drawer.Screen
-        name="Profile"
+        name="Perfil"
         component={Profile}
         options={{
           drawerItemStyle: { display: 'none' }, // Oculta del drawer

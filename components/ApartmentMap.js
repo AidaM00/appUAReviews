@@ -4,6 +4,7 @@ import MapView, { Marker, Callout } from 'react-native-maps';
 import { useSelector, useDispatch } from 'react-redux';
 import { getApartments, getApartmentDescription } from '../redux/ActionCreators';
 import { useNavigation } from '@react-navigation/native';
+import BackToHomeButton from './BackToHomeButton'; 
 
 export default function ApartmentMap() {
   const apartments = useSelector((state) => state.apartmentState.apartments);
@@ -55,6 +56,8 @@ export default function ApartmentMap() {
 
   return (
     <View style={{ flex: 1 }}>
+      <BackToHomeButton />
+
       <View style={styles.overlayContainer}>
         <Text style={styles.overlayText}>
           Navega y descubre los apartamentos disponibles
@@ -94,7 +97,7 @@ const styles = StyleSheet.create({
   },
   overlayContainer: {
     position: 'absolute',
-    top: 40,
+    top: 100,
     left: 20,
     right: 20,
     zIndex: 10,
@@ -111,13 +114,13 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 8,
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: '#007AFF',
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 8,
   },
   buttonText: {
-    color: '#333',
+    color: '#fff',
     fontWeight: 'bold',
   },
   callout: {
@@ -144,4 +147,3 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 });
-

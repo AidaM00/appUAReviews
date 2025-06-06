@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ImageBackground, ScrollView, Dimensions, Toucha
 import { BarChart } from 'react-native-chart-kit';
 import { collection, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
+import BackToHomeButton from './BackToHomeButton';
 
 const criterios = ['Ubicación', 'Ambiente', 'Limpieza', 'Iluminación', 'Comodidad'];
 
@@ -88,6 +89,7 @@ export default function Statistics() {
       resizeMode="cover"
     >
       <View style={styles.overlay}>
+        <BackToHomeButton />
         <Text style={styles.introText}>
           Aquí puedes consultar un resumen de las valoraciones realizadas por los usuarios,
           tanto de forma general como por cada apartamento.
@@ -233,6 +235,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.3)',
   },
   introText: {
+    marginTop: 80,
     fontSize: 16,
     color: '#333',
     backgroundColor: 'rgba(255,255,255,0.7)',

@@ -11,7 +11,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { getApartments, getApartmentDescription } from '../redux/ActionCreators';
 import { Card, Title } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import BackToHomeButton from './BackToHomeButton';
 
 export default function Apartments({ navigation }) {
   const dispatch = useDispatch();
@@ -47,14 +47,9 @@ export default function Apartments({ navigation }) {
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.overlay}>
-        <View style={styles.titleContainer}>
-          <View style={styles.titleBox}>
-            <Icon name="home-city" size={28} color="#4a4a4a" style={styles.icon} />
-            <Text style={styles.title}>Apartamentos</Text>
-          </View>
-        </View>
+      <BackToHomeButton />
 
+      <View style={styles.overlay}>
         {/* Introductorio + botón mapa */}
         <View style={styles.introContainer}>
           <Text style={styles.introText}>
@@ -93,22 +88,11 @@ export default function Apartments({ navigation }) {
 const styles = StyleSheet.create({
   background: { flex: 1 },
   overlay: { flex: 1, padding: 20, backgroundColor: 'rgba(255,255,255,0.3)' },
-  titleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  titleBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    borderRadius: 10,
-  },
+
   icon: { marginRight: 8 },
-  title: { fontSize: 28, fontWeight: 'bold', color: '#333' },
 
   introContainer: {
+    marginTop: 80,
     marginBottom: 15,
     backgroundColor: 'rgba(255,255,255,0.6)',
     borderRadius: 10,
