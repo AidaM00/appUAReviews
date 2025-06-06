@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import { useSelector, useDispatch } from 'react-redux';
 import { getApartments, getApartmentDescription } from '../redux/ActionCreators';
@@ -38,9 +38,10 @@ export default function ApartmentMap() {
   });
 
   const handleNavigate = (apt) => {
-    navigation.navigate('Apartamentos', {
-      screen: 'ApartmentDetail',
-      params: { id: apt.id, name: apt.name },
+    navigation.navigate('ApartmentDetail', {
+      id: apt.id,
+      name: apt.name,
+      from: 'Mapa interactivo',
     });
   };
 
@@ -54,10 +55,18 @@ export default function ApartmentMap() {
 
   return (
     <View style={{ flex: 1 }}>
-      
-      <Text style={styles.overlayText}>
-        🗺️ Navega y descubre los apartamentos disponibles
-      </Text>
+      <View style={styles.overlayContainer}>
+        <Text style={styles.overlayText}>
+          Navega y descubre los apartamentos disponibles
+        </Text>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Apartamentos')}
+        >
+          <Text style={styles.buttonText}>Ver lista de apartamentos</Text>
+        </TouchableOpacity>
+      </View>
 
       <MapView style={styles.map} initialRegion={initialRegion}>
         {apartmentsWithCoords.map((apt) => (
@@ -83,12 +92,15 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  overlayText: {
+  overlayContainer: {
     position: 'absolute',
     top: 40,
     left: 20,
     right: 20,
     zIndex: 10,
+    alignItems: 'center',
+  },
+  overlayText: {
     backgroundColor: 'rgba(255,255,255,0.8)',
     padding: 10,
     borderRadius: 10,
@@ -96,6 +108,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333',
     fontWeight: '500',
+  },
+  button: {
+    marginTop: 8,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: '#333',
+    fontWeight: 'bold',
   },
   callout: {
     width: 160,
@@ -121,3 +144,4 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 });
+

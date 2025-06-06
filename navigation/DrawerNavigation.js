@@ -1,66 +1,34 @@
 import React from 'react';
-import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {
+  createDrawerNavigator,
+  DrawerContentScrollView,
+  DrawerItemList,
+} from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { View, Image, StyleSheet } from 'react-native';
+
+// Componentes de pantalla
 import Home from '../components/Home';
 import Apartments from '../components/Apartments';
-import ApartmentDetail from '../components/ApartmentDetail'; 
+import ApartmentDetail from '../components/ApartmentDetail';
 import Statistics from '../components/Statistics';
 import ApartmentMap from '../components/ApartmentMap';
 import Account from '../components/Account';
-import Profile from '../components/Profile'; 
-import { View, Image, StyleSheet } from 'react-native';
+import Profile from '../components/Profile';
 
 const Drawer = createDrawerNavigator();
-const Stack = createNativeStackNavigator();
 
 function CustomDrawerContent(props) {
   return (
     <DrawerContentScrollView {...props}>
       <View style={styles.logoContainer}>
         <Image
-          source={require('../assets/images/logo.png')}  
+          source={require('../assets/images/logo.png')}
           style={styles.logo}
         />
       </View>
       <DrawerItemList {...props} />
     </DrawerContentScrollView>
-  );
-}
-
-// STACK para Apartamentos + ApartmentDetail
-function ApartmentsStack() {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen 
-        name="Apartments" 
-        component={Apartments} 
-        options={{ headerShown: false }} 
-      />
-      <Stack.Screen 
-        name="ApartmentDetail" 
-        component={ApartmentDetail} 
-        options={{ headerShown: false }} 
-      />
-    </Stack.Navigator>
-  );
-}
-
-// STACK para Cuenta + Perfil
-function AccountStack() {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen 
-        name="Account" 
-        component={Account} 
-        options={{ headerShown: false }} 
-      />
-      <Stack.Screen 
-        name="Profile" 
-        component={Profile} 
-        options={{ headerShown: false }} 
-      />
-    </Stack.Navigator>
   );
 }
 
@@ -81,11 +49,18 @@ export default function DrawerNavigation() {
       />
       <Drawer.Screen
         name="Apartamentos"
-        component={ApartmentsStack}
+        component={Apartments}
         options={{
           drawerIcon: ({ color, size }) => (
             <Icon name="business-outline" color={color} size={size} />
           ),
+        }}
+      />
+      <Drawer.Screen
+        name="ApartmentDetail"
+        component={ApartmentDetail}
+        options={{
+          drawerItemStyle: { display: 'none' }, // Oculta del drawer
         }}
       />
       <Drawer.Screen
@@ -108,11 +83,18 @@ export default function DrawerNavigation() {
       />
       <Drawer.Screen
         name="Mi cuenta"
-        component={AccountStack}
+        component={Account}
         options={{
           drawerIcon: ({ color, size }) => (
             <Icon name="person-outline" color={color} size={size} />
           ),
+        }}
+      />
+      <Drawer.Screen
+        name="Profile"
+        component={Profile}
+        options={{
+          drawerItemStyle: { display: 'none' }, // Oculta del drawer
         }}
       />
     </Drawer.Navigator>

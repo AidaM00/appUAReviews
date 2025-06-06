@@ -27,6 +27,7 @@ export default function Apartments({ navigation }) {
     navigation.navigate('ApartmentDetail', {
       id: item.id,
       name: item.name,
+      from: 'Apartamentos',
     });
   };
 

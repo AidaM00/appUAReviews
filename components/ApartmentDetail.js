@@ -15,7 +15,7 @@ import { auth, db } from '../firebase/config';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 
 export default function ApartmentDetail({ route }) {
-  const { id, name } = route.params;
+  const { id, name, from } = route.params || {};
   const description = useSelector(state => state.descripcion.descriptions[id]);
   const features = description?.features || [];
 
@@ -159,7 +159,15 @@ const handleRatingSubmit = async () => {
     >
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.goBack()}
+        onPress={() => {
+          if (from === 'Apartamentos') {
+            navigation.navigate('Apartamentos');
+          } else if (from === 'Mapa interactivo') {
+            navigation.navigate('Mapa interactivo');
+          } else {
+            navigation.goBack();
+          }
+        }}
       >
         <View style={styles.backButtonContainer}>
           <Icon name="arrow-left" size={20} color="#fff" />
