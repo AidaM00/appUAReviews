@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image, TouchableOpacity, ScrollView, Button, Alert } from 'react-native';
 
 import { useSelector, useDispatch } from 'react-redux';
@@ -12,7 +12,7 @@ import * as FileSystem from 'expo-file-system';
 import * as MailComposer from 'expo-mail-composer';
 import { auth, db } from '../firebase/config';
 
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, Timestamp, query, where, getDocs } from 'firebase/firestore';
 
 export default function ApartmentDetail({ route }) {
   const { id, name, from } = route.params || {};
@@ -27,6 +27,9 @@ export default function ApartmentDetail({ route }) {
     Iluminación: 5,
     Comodidad: 5,
   });
+
+  // Nuevo estado para controlar si el usuario ya valoró este apartamento
+  const [alreadyRated, setAlreadyRated] = useState(false);
 
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -52,38 +55,75 @@ export default function ApartmentDetail({ route }) {
 
   const imageSource = apartmentImages[id];
 
-const handleRatingSubmit = async () => {
-  if (!auth.currentUser) {
-    Alert.alert('Error', 'Debes iniciar sesión para valorar este apartamento.');
-    return;
-  }
+  // Efecto para verificar si el usuario ya valoró este apartamento
+  useEffect(() => {
+    const checkIfAlreadyRated = async () => {
+      if (!auth.currentUser) {
+        setAlreadyRated(false);
+        return;
+      }
 
-  try {
-    await addDoc(collection(db, 'valoraciones'), {
-      userId: auth.currentUser.uid,
-      apartmentId: id,
-      ratings: newRating,
-      createdAt: Timestamp.now(),
-    });
+      try {
+        const q = query(
+          collection(db, 'valoraciones'),
+          where('userId', '==', auth.currentUser.uid),
+          where('apartmentId', '==', id)
+        );
 
-    Alert.alert('¡Gracias!', 'Tu valoración ha sido registrada.');
-    setShowEvaluation(false);
-  } catch (error) {
-    console.error('Error al guardar la valoración:', error);
-    Alert.alert('Error', 'No se pudo guardar la valoración.');
-  }
-};
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          setAlreadyRated(true);
+          setShowEvaluation(false); // Por si estaba abierto
+        } else {
+          setAlreadyRated(false);
+        }
+      } catch (error) {
+        console.error('Error al comprobar valoraciones:', error);
+        setAlreadyRated(false);
+      }
+    };
+
+    checkIfAlreadyRated();
+  }, [id]);
+
+  const handleRatingSubmit = async () => {
+    if (!auth.currentUser) {
+      Alert.alert('Error', 'Debes iniciar sesión para valorar este apartamento.');
+      return;
+    }
+
+    if (alreadyRated) {
+      Alert.alert('Aviso', 'Ya has valorado este apartamento.');
+      setShowEvaluation(false);
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, 'valoraciones'), {
+        userId: auth.currentUser.uid,
+        apartmentId: id,
+        ratings: newRating,
+        createdAt: Timestamp.now(),
+      });
+
+      Alert.alert('¡Gracias!', 'Tu valoración ha sido registrada.');
+      setShowEvaluation(false);
+      setAlreadyRated(true); // Bloqueamos futuras valoraciones
+    } catch (error) {
+      console.error('Error al guardar la valoración:', error);
+      Alert.alert('Error', 'No se pudo guardar la valoración.');
+    }
+  };
 
   // Función para compartir información del apartamento solo por email usando MailComposer
   const handleShareEmail = async () => {
     try {
-      // Captura que vamos a mandar
       const uri = await captureRef(viewRef, {
         format: 'png',
         quality: 0.9,
       });
 
-      // Copia la imagen a cache para adjuntarla en el correo
       const fileUri = `${FileSystem.cacheDirectory}apartment-${id}.png`;
       await FileSystem.copyAsync({ from: uri, to: fileUri });
 
@@ -201,16 +241,28 @@ const handleRatingSubmit = async () => {
           </View>
         </View>
 
-        <TouchableOpacity
-          onPress={() => setShowEvaluation(!showEvaluation)}
-          style={styles.evaluateButton}
-        >
-          <Text style={styles.evaluateButtonText}>
-            {showEvaluation ? 'Cancelar evaluación' : 'Evaluar apartamento'}
-          </Text>
-        </TouchableOpacity>
+        {/* Mostrar mensaje si ya valoró */}
+        {alreadyRated && (
+          <View style={[styles.card, { marginTop: 10 }]}>
+            <Text style={{ textAlign: 'center', color: 'green', fontWeight: 'bold' }}>
+              Ya has valorado este apartamento. ¡Gracias!
+            </Text>
+          </View>
+        )}
 
-        {showEvaluation && (
+        {/* Botón evaluar solo si no ha valorado */}
+        {!alreadyRated && (
+          <TouchableOpacity
+            onPress={() => setShowEvaluation(!showEvaluation)}
+            style={styles.evaluateButton}
+          >
+            <Text style={styles.evaluateButtonText}>
+              {showEvaluation ? 'Cancelar evaluación' : 'Evaluar apartamento'}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        {showEvaluation && !alreadyRated && (
           <View style={[styles.card, { marginTop: 20 }]}>
             <Text style={styles.title}>Evaluar este apartamento</Text>
             {Object.keys(newRating).map(key => (

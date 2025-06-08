@@ -12,8 +12,13 @@ export default function Statistics() {
   const [ratingsByApartment, setRatingsByApartment] = useState({});
   const [selectedApartmentId, setSelectedApartmentId] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
+    // Obtener usuario actual
+    const currentUser = auth.currentUser;
+    setUserId(currentUser ? currentUser.uid : null);
+
     const fetchValoraciones = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, 'valoraciones'));
@@ -81,6 +86,19 @@ export default function Statistics() {
     .slice(0, 3);
 
   const medals = ['🥇', '🥈', '🥉'];
+
+  // Valoraciones del usuario actual
+  const misValoraciones = userId
+    ? valoraciones.filter(v => v.userId === userId)
+    : [];
+
+  const resumenUsuario = criterios.reduce((acc, criterio) => {
+    const valores = misValoraciones.map(r => r.ratings[criterio]).filter(Boolean);
+    acc[criterio] = valores.length > 0
+      ? (valores.reduce((s, v) => s + v, 0) / valores.length).toFixed(2)
+      : 'N/A';
+    return acc;
+  }, {});
 
   return (
     <ImageBackground
@@ -186,6 +204,39 @@ export default function Statistics() {
               })}
             </View>
           </View>
+
+          {/* Sección: Mis valoraciones (solo si está logueado) */}
+
+          {userId && (
+            <View style={styles.sectionBox}>
+              <Text style={styles.sectionTitle}>📝 Mis valoraciones</Text>
+              {misValoraciones.length === 0 ? (
+                <Text style={styles.noRatings}>Aún no has valorado ningún apartamento.</Text>
+              ) : (
+                <>
+                  {Object.entries(
+                    misValoraciones.reduce((acc, val) => {
+                      const id = val.apartmentId;
+                      const total = criterios.reduce((suma, crit) => suma + val.ratings[crit], 0);
+                      if (!acc[id]) acc[id] = { sum: 0, count: 0 };
+                      acc[id].sum += total / criterios.length;
+                      acc[id].count += 1;
+                      return acc;
+                    }, {})
+                  ).map(([id, data]) => {
+                    const media = (data.sum / data.count).toFixed(2);
+                    return (
+                      <View key={id} style={styles.row}>
+                        <Text style={styles.value}>🏢 Apartamento {id}</Text>
+                        <Text style={styles.label}>📊 Media: {media}</Text>
+                      </View>
+                    );
+                  })}
+                </>
+              )}
+            </View>
+          )}
+
         </ScrollView>
 
         {/* Modal */}
@@ -280,7 +331,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 10,
     margin: 5,
-    alignItems:'center',
+    alignItems: 'center',
   },
   apartmentButtonText: {
     color: '#fff',
