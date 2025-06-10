@@ -4,7 +4,7 @@ import { BarChart } from 'react-native-chart-kit';
 import { collection, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
 import BackToHomeButton from './BackToHomeButton';
-
+import { onSnapshot } from 'firebase/firestore';
 const criterios = ['Ubicación', 'Ambiente', 'Limpieza', 'Iluminación', 'Comodidad'];
 
 export default function Statistics() {
@@ -15,31 +15,29 @@ export default function Statistics() {
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    // Obtener usuario actual
     const currentUser = auth.currentUser;
     setUserId(currentUser ? currentUser.uid : null);
 
-    const fetchValoraciones = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'valoraciones'));
-        const datos = querySnapshot.docs.map(doc => doc.data());
+    const unsubscribe = onSnapshot(collection(db, 'valoraciones'), (querySnapshot) => {
+      const datos = querySnapshot.docs.map(doc => doc.data());
 
-        // Agrupar por apartmentId
-        const agrupadas = datos.reduce((acc, curr) => {
-          const id = curr.apartmentId;
-          if (!acc[id]) acc[id] = [];
-          acc[id].push(curr);
-          return acc;
-        }, {});
-        setValoraciones(datos);
-        setRatingsByApartment(agrupadas);
-      } catch (error) {
-        console.error('Error al obtener valoraciones:', error);
-      }
-    };
+      const agrupadas = datos.reduce((acc, curr) => {
+        const id = curr.apartmentId;
+        if (!acc[id]) acc[id] = [];
+        acc[id].push(curr);
+        return acc;
+      }, {});
 
-    fetchValoraciones();
+      setValoraciones(datos);
+      setRatingsByApartment(agrupadas);
+    }, (error) => {
+      console.error('Error al obtener valoraciones en tiempo real:', error);
+    });
+
+    return () => unsubscribe();
   }, []);
+
+
 
   const allRatings = valoraciones;
   const totalVotos = allRatings.length;
@@ -205,8 +203,7 @@ export default function Statistics() {
             </View>
           </View>
 
-          {/* Sección: Mis valoraciones (solo si está logueado) */}
-
+          {/* Sección: Mis valoraciones (solo si hay sesión iniciada) */}
           {userId && (
             <View style={styles.sectionBox}>
               <Text style={styles.sectionTitle}>📝 Mis valoraciones</Text>
@@ -226,9 +223,9 @@ export default function Statistics() {
                   ).map(([id, data]) => {
                     const media = (data.sum / data.count).toFixed(2);
                     return (
-                      <View key={id} style={styles.row}>
-                        <Text style={styles.value}>🏢 Apartamento {id}</Text>
-                        <Text style={styles.label}>📊 Media: {media}</Text>
+                      <View key={id} style={styles.ratingCard}>
+                        <Text style={styles.apartmentTitle}>🏢 Apartamento {id}</Text>
+                        <Text style={styles.ratingScore}>📊 Nota media asignada: <Text style={styles.scoreValue}>{media}</Text></Text>
                       </View>
                     );
                   })}
@@ -237,9 +234,10 @@ export default function Statistics() {
             </View>
           )}
 
+
         </ScrollView>
 
-        {/* Modal */}
+        {/* Modal para los apartamentos */}
         <Modal
           visible={modalVisible}
           transparent={true}
@@ -384,4 +382,35 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     color: '#333',
   },
+  ratingCard: {
+    backgroundColor: '#fff',
+    padding: 15,
+    marginVertical: 8,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+    borderLeftWidth: 5,
+    borderLeftColor: '#007AFF',
+  },
+
+  apartmentTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#007AFF',
+    marginBottom: 5,
+  },
+
+  ratingScore: {
+    fontSize: 15,
+    color: '#333',
+  },
+
+  scoreValue: {
+    fontWeight: 'bold',
+    color: '#007AFF',
+  },
+
 });

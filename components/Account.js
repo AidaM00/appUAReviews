@@ -26,6 +26,18 @@ export default function Account() {
 
   const navigation = useNavigation();
 
+  const resetFormFields = () => {
+    setEmail('');
+    setPassword('');
+    setNombre('');
+    setApellidos('');
+    setEdad('');
+    setTelefono('');
+    setCiudad('');
+    setCodigoPostal('');
+    setPhoto(null);
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async user => {
       setCurrentUser(user);
@@ -180,6 +192,9 @@ export default function Account() {
   const handleLogout = async () => {
     try {
       await logout();
+      setMode(null);
+      setCurrentUser(null);
+      resetFormFields();
       Alert.alert('¡Hasta pronto!', 'Sesión cerrada correctamente.');
     } catch (err) {
       Alert.alert('Error', mapFirebaseError(err));
@@ -199,18 +214,15 @@ export default function Account() {
   const handleBack = () => {
     if (mode) {
       setMode(null);
-      setEmail('');
-      setPassword('');
-      setNombre('');
-      setApellidos('');
-      setEdad('');
-      setTelefono('');
-      setCiudad('');
-      setCodigoPostal('');
-      setPhoto(null);
+      resetFormFields();
     } else {
       navigation.goBack();
     }
+  };
+
+  const handleModeChange = (newMode) => {
+    resetFormFields();
+    setMode(newMode);
   };
 
   return (
@@ -224,10 +236,10 @@ export default function Account() {
               Accede o crea una cuenta para guardar tus datos y personalizar tu experiencia. 
               También podrás añadir valoraciones a los apartamentos.
             </Text>
-            <TouchableOpacity style={styles.evaluateButton} onPress={() => setMode('login')}>
+            <TouchableOpacity style={styles.evaluateButton} onPress={() => handleModeChange('login')}>
               <Text style={styles.evaluateButtonText}>Iniciar sesión</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.evaluateButton} onPress={() => setMode('register')}>
+            <TouchableOpacity style={styles.evaluateButton} onPress={() => handleModeChange('register')}>
               <Text style={styles.evaluateButtonText}>Crear cuenta</Text>
             </TouchableOpacity>
           </>

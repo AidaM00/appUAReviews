@@ -18,18 +18,24 @@ export default function ApartmentDetail({ route }) {
   const { id, name, from } = route.params || {};
   const description = useSelector(state => state.descripcion.descriptions[id]);
   const features = description?.features || [];
-
+  //Gestion de las valoraciones
   const [showEvaluation, setShowEvaluation] = useState(false);
-  const [newRating, setNewRating] = useState({
-    Ubicación: 5,
-    Ambiente: 5,
-    Limpieza: 5,
-    Iluminación: 5,
-    Comodidad: 5,
-  });
 
-  // Nuevo estado para controlar si el usuario ya valoró este apartamento
+const initialRating = {
+  Ubicación: 0,
+  Ambiente: 0,
+  Limpieza: 0,
+  Iluminación: 0,
+  Comodidad: 0,
+};
+const [newRating, setNewRating] = useState(initialRating);
+
+
   const [alreadyRated, setAlreadyRated] = useState(false);
+  useEffect(() => {
+  setNewRating(initialRating);
+}, [id, showEvaluation]);
+
 
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -55,7 +61,7 @@ export default function ApartmentDetail({ route }) {
 
   const imageSource = apartmentImages[id];
 
-  // Efecto para verificar si el usuario ya valoró este apartamento
+  // Comprobar si ya se habia valorado
   useEffect(() => {
     const checkIfAlreadyRated = async () => {
       if (!auth.currentUser) {
@@ -74,7 +80,7 @@ export default function ApartmentDetail({ route }) {
 
         if (!querySnapshot.empty) {
           setAlreadyRated(true);
-          setShowEvaluation(false); // Por si estaba abierto
+          setShowEvaluation(false);
         } else {
           setAlreadyRated(false);
         }
@@ -93,30 +99,27 @@ export default function ApartmentDetail({ route }) {
       return;
     }
 
-    if (alreadyRated) {
-      Alert.alert('Aviso', 'Ya has valorado este apartamento.');
-      setShowEvaluation(false);
-      return;
-    }
-
     try {
-      await addDoc(collection(db, 'valoraciones'), {
+      const docRef = await addDoc(collection(db, 'valoraciones'), {
         userId: auth.currentUser.uid,
         apartmentId: id,
         ratings: newRating,
         createdAt: Timestamp.now(),
       });
 
+      console.log('Valoración enviada con ID:', docRef.id);
+
       Alert.alert('¡Gracias!', 'Tu valoración ha sido registrada.');
       setShowEvaluation(false);
-      setAlreadyRated(true); // Bloqueamos futuras valoraciones
+      setAlreadyRated(true);
     } catch (error) {
       console.error('Error al guardar la valoración:', error);
       Alert.alert('Error', 'No se pudo guardar la valoración.');
     }
   };
 
-  // Función para compartir información del apartamento solo por email usando MailComposer
+
+  // Funcion para compartir información del apartamento solo por email usando MailComposer
   const handleShareEmail = async () => {
     try {
       const uri = await captureRef(viewRef, {
@@ -145,7 +148,7 @@ export default function ApartmentDetail({ route }) {
     }
   };
 
-  // Función para compartir en otras apps de redes sociales usando Sharing
+  // Funcion para compartir en otras apps de redes sociales usando Sharing
   const handleShareOther = async () => {
     try {
       const uri = await captureRef(viewRef, {
@@ -241,7 +244,6 @@ export default function ApartmentDetail({ route }) {
           </View>
         </View>
 
-        {/* Mostrar mensaje si ya valoró */}
         {alreadyRated && (
           <View style={[styles.card, { marginTop: 10 }]}>
             <Text style={{ textAlign: 'center', color: 'green', fontWeight: 'bold' }}>
@@ -250,7 +252,7 @@ export default function ApartmentDetail({ route }) {
           </View>
         )}
 
-        {/* Botón evaluar solo si no ha valorado */}
+
         {!alreadyRated && (
           <TouchableOpacity
             onPress={() => setShowEvaluation(!showEvaluation)}
@@ -272,7 +274,7 @@ export default function ApartmentDetail({ route }) {
                 </Text>
                 <Slider
                   style={{ width: '100%', height: 40 }}
-                  minimumValue={1}
+                  minimumValue={0}
                   maximumValue={5}
                   step={1}
                   value={newRating[key]}
