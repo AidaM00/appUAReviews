@@ -35,7 +35,8 @@ export default function Apartments({ navigation }) {
     <TouchableOpacity onPress={() => handlePress(item)}>
       <Card style={styles.card}>
         <Card.Content>
-          <Title style={styles.cardTitle}>{item.name}</Title>
+          <Title style={styles.cardTitle}>{item.id} - {item.name}</Title>
+
         </Card.Content>
       </Card>
     </TouchableOpacity>
@@ -50,7 +51,7 @@ export default function Apartments({ navigation }) {
       <BackToHomeButton />
 
       <View style={styles.overlay}>
-        {/* Introductorio + botón mapa */}
+        {/* Encabezado + botón mapa */}
         <View style={styles.introContainer}>
           <Text style={styles.introText}>
             Explora los apartamentos disponibles. También puedes ver su ubicación en el mapa interacivo pulsando el siguiente botón:
@@ -97,11 +98,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.6)',
     borderRadius: 10,
     padding: 10,
+    
   },
   introText: {
     fontSize: 16,
     color: '#333',
     marginBottom: 10,
+    textAlign: 'center',
   },
   mapButton: {
     backgroundColor: '#007AFF',
@@ -132,7 +135,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.7)',
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 14.5,
     fontWeight: '600',
     color: '#333',
     textAlign: 'center',
