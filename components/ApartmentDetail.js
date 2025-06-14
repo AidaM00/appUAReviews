@@ -21,20 +21,20 @@ export default function ApartmentDetail({ route }) {
   //Gestion de las valoraciones
   const [showEvaluation, setShowEvaluation] = useState(false);
 
-const initialRating = {
-  Ubicación: 0,
-  Ambiente: 0,
-  Limpieza: 0,
-  Iluminación: 0,
-  Comodidad: 0,
-};
-const [newRating, setNewRating] = useState(initialRating);
+  const initialRating = {
+    Ubicación: 0,
+    Ambiente: 0,
+    Limpieza: 0,
+    Iluminación: 0,
+    Comodidad: 0,
+  };
+  const [newRating, setNewRating] = useState(initialRating);
 
 
   const [alreadyRated, setAlreadyRated] = useState(false);
   useEffect(() => {
-  setNewRating(initialRating);
-}, [id, showEvaluation]);
+    setNewRating(initialRating);
+  }, [id, showEvaluation]);
 
 
   const dispatch = useDispatch();
@@ -62,36 +62,35 @@ const [newRating, setNewRating] = useState(initialRating);
   const imageSource = apartmentImages[id];
 
   // Comprobar si ya se habia valorado
+  const checkIfAlreadyRated = async () => {
+    if (!auth.currentUser) {
+      setAlreadyRated(false);
+      return;
+    }
+
+    try {
+      const q = query(
+        collection(db, 'valoraciones'),
+        where('userId', '==', auth.currentUser.uid),
+        where('apartmentId', '==', id)
+      );
+
+      const querySnapshot = await getDocs(q);
+
+      setAlreadyRated(!querySnapshot.empty);
+      if (!querySnapshot.empty) {
+        setShowEvaluation(false);
+      }
+    } catch (error) {
+      console.error('Error al comprobar valoraciones:', error);
+      setAlreadyRated(false);
+    }
+  };
+
   useEffect(() => {
-    const checkIfAlreadyRated = async () => {
-      if (!auth.currentUser) {
-        setAlreadyRated(false);
-        return;
-      }
-
-      try {
-        const q = query(
-          collection(db, 'valoraciones'),
-          where('userId', '==', auth.currentUser.uid),
-          where('apartmentId', '==', id)
-        );
-
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-          setAlreadyRated(true);
-          setShowEvaluation(false);
-        } else {
-          setAlreadyRated(false);
-        }
-      } catch (error) {
-        console.error('Error al comprobar valoraciones:', error);
-        setAlreadyRated(false);
-      }
-    };
-
     checkIfAlreadyRated();
-  }, [id]);
+  }, [id, auth.currentUser?.uid]);
+
 
   const handleRatingSubmit = async () => {
     if (!auth.currentUser) {
@@ -111,7 +110,7 @@ const [newRating, setNewRating] = useState(initialRating);
 
       Alert.alert('¡Gracias!', 'Tu valoración ha sido registrada.');
       setShowEvaluation(false);
-      setAlreadyRated(true);
+      await checkIfAlreadyRated();
     } catch (error) {
       console.error('Error al guardar la valoración:', error);
       Alert.alert('Error', 'No se pudo guardar la valoración.');

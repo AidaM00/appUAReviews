@@ -60,7 +60,7 @@ export default function DrawerNavigation() {
         name="ApartmentDetail"
         component={ApartmentDetail}
         options={{
-          drawerItemStyle: { display: 'none' }, // Oculta del drawer
+          drawerItemStyle: { display: 'none' },
         }}
       />
       <Drawer.Screen
@@ -94,7 +94,7 @@ export default function DrawerNavigation() {
         name="Perfil"
         component={Profile}
         options={{
-          drawerItemStyle: { display: 'none' }, // Oculta del drawer
+          drawerItemStyle: { display: 'none' }, 
         }}
       />
     </Drawer.Navigator>

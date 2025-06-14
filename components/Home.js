@@ -29,7 +29,7 @@ export default function Home() {
             </Text>
           </View>
 
-          {/* Card 1 */}
+          {/* Lista */}
           <View style={styles.card}>
             <View style={styles.row}>
               <View style={styles.badge}><Text style={styles.badgeText}>1</Text></View>
@@ -43,7 +43,7 @@ export default function Home() {
             </TouchableOpacity>
           </View>
 
-          {/* Card 2 */}
+          {/* Estadisticas */}
           <View style={styles.card}>
             <View style={styles.row}>
               <View style={styles.badge}><Text style={styles.badgeText}>2</Text></View>
@@ -57,7 +57,7 @@ export default function Home() {
             </TouchableOpacity>
           </View>
 
-          {/* Card 3 */}
+          {/* Mapa */}
           <View style={styles.card}>
             <View style={styles.row}>
               <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View>
@@ -71,7 +71,7 @@ export default function Home() {
             </TouchableOpacity>
           </View>
 
-          {/* Card 4 */}
+          {/* Mi cuenta */}
           <View style={styles.card}>
             <View style={styles.row}>
               <View style={styles.badge}><Text style={styles.badgeText}>4</Text></View>
