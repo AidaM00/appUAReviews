@@ -9,6 +9,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import axios from 'axios';
 import BackToHomeButton from './BackToHomeButton';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function Account() {
   const [mode, setMode] = useState(null);
@@ -86,15 +87,8 @@ export default function Account() {
     try {
       const response = await axios.post(
         'https://api.imgur.com/3/image',
-        {
-          image: base64Image,
-          type: 'base64',
-        },
-        {
-          headers: {
-            Authorization: 'Client-ID 95a39a9f5968fcb',
-          },
-        }
+        { image: base64Image, type: 'base64' },
+        { headers: { Authorization: 'Client-ID 95a39a9f5968fcb' } }
       );
       return response.data.data.link;
     } catch (error) {
@@ -164,7 +158,6 @@ export default function Account() {
         Alert.alert('Campos incompletos', 'Por favor, rellena todos los campos.');
         return;
       }
-
       const base64 = await imageToBase64(photo);
       const imgurUrl = await uploadToImgur(base64);
 
@@ -172,14 +165,7 @@ export default function Account() {
       const user = userCredential.user;
 
       await setDoc(doc(db, 'usuarios', user.uid), {
-        email: user.email,
-        nombre,
-        apellidos,
-        edad,
-        telefono,
-        ciudad,
-        codigoPostal,
-        fotoURL: imgurUrl,
+        email: user.email, nombre, apellidos, edad, telefono, ciudad, codigoPostal, fotoURL: imgurUrl
       });
 
       Alert.alert('¡Registro exitoso!', 'Tu cuenta ha sido creada.');
@@ -212,12 +198,8 @@ export default function Account() {
   };
 
   const handleBack = () => {
-    if (mode) {
-      setMode(null);
-      resetFormFields();
-    } else {
-      navigation.goBack();
-    }
+    setMode(null);
+    resetFormFields();
   };
 
   const handleModeChange = (newMode) => {
@@ -227,14 +209,14 @@ export default function Account() {
 
   return (
     <ImageBackground source={require('../assets/images/fondo_cuenta.png')} style={styles.background} resizeMode="cover">
-      {(mode || currentUser) && <BackToHomeButton />}
+      {!mode && !currentUser && <BackToHomeButton />}
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {!currentUser && !mode && (
           <>
             <Text style={styles.title}>¡Bienvenid@!</Text>
             <Text style={styles.description}>
-              Accede o crea una cuenta para guardar tus datos y personalizar tu experiencia. 
-              También podrás añadir valoraciones a los apartamentos.
+              Accede o crea una cuenta para guardar tus datos y personalizar tu experiencia.
             </Text>
             <TouchableOpacity style={styles.evaluateButton} onPress={() => handleModeChange('login')}>
               <Text style={styles.evaluateButtonText}>Iniciar sesión</Text>
@@ -244,11 +226,20 @@ export default function Account() {
             </TouchableOpacity>
           </>
         )}
+
         {mode && !currentUser && (
           <>
+            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+              <View style={styles.backButtonContainer}>
+                <Icon name="arrow-left" size={20} color="#fff" />
+                <Text style={styles.backButtonText}>Atrás</Text>
+              </View>
+            </TouchableOpacity>
+
             <Text style={styles.subtitle}>
               {mode === 'login' ? 'Introduce tus datos para acceder' : 'Rellena todos los campos y sube tu foto'}
             </Text>
+
             {mode === 'register' && (
               <>
                 {!photo && (
@@ -274,15 +265,15 @@ export default function Account() {
             </TouchableOpacity>
           </>
         )}
+
         {currentUser && (
           <>
+            <BackToHomeButton />
             <Text style={styles.title}>¡Hola, {currentUser.email.split('@')[0]}!</Text>
             {userData?.fotoURL && (
               <Image source={{ uri: userData.fotoURL }} style={{ width: 120, height: 120, borderRadius: 60, alignSelf: 'center', marginVertical: 10 }} />
             )}
-            <Text style={styles.description}>
-              Desde aquí puedes modificar tus datos de cuenta y añadir valoraciones a los apartamentos.
-            </Text>
+            <Text style={styles.description}>Desde aquí puedes modificar tus datos y añadir valoraciones.</Text>
             <TouchableOpacity style={styles.evaluateButton} onPress={() => navigation.navigate('Perfil')}>
               <Text style={styles.evaluateButtonText}>Ver / Editar perfil</Text>
             </TouchableOpacity>
@@ -304,18 +295,13 @@ const styles = StyleSheet.create({
   scrollContent: { padding: 20, paddingTop: 100, paddingBottom: 40 },
   title: { fontSize: 28, fontWeight: 'bold', color: '#4A90E2', textAlign: 'center', marginBottom: 30 },
   subtitle: { fontSize: 24, color: '#333', textAlign: 'center', marginBottom: 20 },
-  input: {
-    backgroundColor: 'rgba(255,255,255,0.8)', padding: 15, borderRadius: 10,
-    marginBottom: 20, color: 'black',
-  },
-  button: {
-    backgroundColor: 'white', padding: 15, marginVertical: 10, borderRadius: 10, alignItems: 'center',
-  },
+  input: { backgroundColor: 'rgba(255,255,255,0.8)', padding: 15, borderRadius: 10, marginBottom: 20, color: 'black' },
+  button: { backgroundColor: 'white', padding: 15, marginVertical: 10, borderRadius: 10, alignItems: 'center' },
   buttonText: { color: '#4A90E2', fontSize: 18, fontWeight: 'bold' },
-  evaluateButton: {
-    backgroundColor: '#007AFF', paddingVertical: 12, paddingHorizontal: 20,
-    borderRadius: 10, alignSelf: 'center', marginVertical: 10,
-  },
+  evaluateButton: { backgroundColor: '#007AFF', paddingVertical: 12, paddingHorizontal: 20, borderRadius: 10, alignSelf: 'center', marginVertical: 10 },
   evaluateButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 18 },
   description: { fontSize: 16, color: '#333', textAlign: 'center', marginBottom: 30, paddingHorizontal: 10 },
+  backButton: { position: 'absolute', top: 40, left: 20, zIndex: 10 },
+  backButtonContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#000', paddingHorizontal: 15, paddingVertical: 10, borderRadius: 30 },
+  backButtonText: { color: '#fff', fontSize: 14, marginLeft: 10 },
 });

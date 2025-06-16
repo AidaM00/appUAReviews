@@ -133,7 +133,7 @@ export default function Profile() {
 
       await reload(user);
       Alert.alert('¡Guardado!', 'Tus cambios fueron aplicados.', [
-        { text: 'OK', onPress: () => navigation.goBack() }
+        { text: 'OK', onPress: () => navigation.navigate('Mi cuenta') }
       ]);
     } catch (error) {
       Alert.alert('Error', 'Hubo un problema al guardar los cambios.');
