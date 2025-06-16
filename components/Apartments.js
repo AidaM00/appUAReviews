@@ -24,7 +24,7 @@ export default function Apartments({ navigation }) {
 
   const handlePress = (item) => {
     dispatch(getApartmentDescription(item.id));
-    navigation.navigate('ApartmentDetail', {
+    navigation.navigate('Detalles', {
       id: item.id,
       name: item.name,
       from: 'Apartamentos',

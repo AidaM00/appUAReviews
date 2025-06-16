@@ -100,7 +100,7 @@ export default function Statistics() {
 
   return (
     <ImageBackground
-      source={require('../assets/images/fondo_pantalla.png')}
+      source={require('../assets/images/fondo_estadisticas.png')}
       style={styles.background}
       resizeMode="cover"
     >
@@ -256,6 +256,7 @@ export default function Statistics() {
                       {key}: {resumen[key]}
                     </Text>
                   ))}
+                  <Text></Text>
                   <Text style={styles.modalStat}>
                     Total votos: {apartmentRatings.length}
                   </Text>
@@ -311,7 +312,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
     marginBottom: 10,
   },
   label: {

@@ -213,7 +213,7 @@ export default function ApartmentDetail({ route }) {
       >
         <View style={styles.backButtonContainer}>
           <Icon name="arrow-left" size={20} color="#fff" />
-          <Text style={styles.backButtonText}>Back</Text>
+          <Text style={styles.backButtonText}>Atrás</Text>
         </View>
       </TouchableOpacity>
 

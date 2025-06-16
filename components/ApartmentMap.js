@@ -39,7 +39,7 @@ export default function ApartmentMap() {
   });
 
   const handleNavigate = (apt) => {
-    navigation.navigate('ApartmentDetail', {
+    navigation.navigate('Detalles', {
       id: apt.id,
       name: apt.name,
       from: 'Mapa interactivo',

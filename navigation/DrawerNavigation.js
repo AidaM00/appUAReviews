@@ -57,7 +57,7 @@ export default function DrawerNavigation() {
         }}
       />
       <Drawer.Screen
-        name="ApartmentDetail"
+        name="Detalles"
         component={ApartmentDetail}
         options={{
           drawerItemStyle: { display: 'none' },
